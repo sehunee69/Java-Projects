@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
 
+import entity.Entity;
 import entity.Player;
 import tile.TileManager;
 
@@ -36,6 +37,8 @@ public class GamePanel extends JPanel implements Runnable{
     Thread gameThread;
     public CollisionChecker cChecker = new CollisionChecker(this);
     public Player player = new Player(this, keyH);
+    public Entity monsters[] = new Entity[20];
+    AssetSetter aSetter = new AssetSetter(this);
 
     public GamePanel() {
 
@@ -46,6 +49,13 @@ public class GamePanel extends JPanel implements Runnable{
         this.addKeyListener(keyH);
         this.setFocusable(true);
     }
+
+    public void setupGame() {
+
+        aSetter.setMonster();
+
+    }
+
 
     public void startGameThread() {
 
@@ -59,8 +69,6 @@ public class GamePanel extends JPanel implements Runnable{
         
         double drawInterval = 1000000000/FPS;
         double nextDrawTime = System.nanoTime() + drawInterval;
-        
-
 
         while(gameThread != null) {
             
@@ -86,10 +94,19 @@ public class GamePanel extends JPanel implements Runnable{
         }
     }
 
+    
+
     public void update() {
 
         player.update();
+
+        for(int i = 0; i < monsters.length; i++) {
+            if(monsters[i] != null) {
+                monsters[i].update();
+            }
+        }
     }
+    
 
     public void paintComponent(Graphics g) {
 
@@ -98,6 +115,14 @@ public class GamePanel extends JPanel implements Runnable{
         Graphics2D g2 = (Graphics2D)g;
 
         tileM.draw(g2);
+        for(int i = 0; i < monsters.length; i++) {
+            if(monsters[i] != null) {
+                // We need to implement a generic draw method in Entity or cast it
+                // Ideally, move the draw logic from Player to Entity class
+                // For now, we assume Entity has the draw method (See Step 5 below)
+                monsters[i].draw(g2, this); 
+            }
+        }
         player.draw(g2);
         g2.dispose();
     }
