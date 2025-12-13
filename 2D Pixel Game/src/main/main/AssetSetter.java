@@ -20,4 +20,14 @@ public class AssetSetter {
         gp.monsters[1].worldX = gp.tileSize * 23;
         gp.monsters[1].worldY = gp.tileSize * 37;
     }
+
+    public void setObject() {
+        gp.obj[0] = new obj.OBJ_Leaf(gp);
+        gp.obj[0].worldX = gp.tileSize * 25;
+        gp.obj[0].worldY = gp.tileSize * 25;
+        
+        gp.obj[1] = new obj.OBJ_Leaf(gp);
+        gp.obj[1].worldX = gp.tileSize * 28;
+        gp.obj[1].worldY = gp.tileSize * 28;
+    }
 }

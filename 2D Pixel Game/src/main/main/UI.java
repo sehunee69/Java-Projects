@@ -1,0 +1,353 @@
+package main;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import entity.Entity;
+
+public class UI {
+
+    GamePanel gp;
+    Graphics2D g2;
+    Font arial_40;
+    
+    // VARIABLES
+    public boolean messageOn = false;
+    public String message = "";
+    int messageCounter = 0;
+    public int commandNum = 0;
+    
+    // INVENTORY
+    public int slotCol = 0;
+    public int slotRow = 0;
+    
+    // SUBSTATE: 0 = Menu Select, 1 = Status, 2 = Bag
+    public int subState = 0; 
+
+    public UI(GamePanel gp) {
+        this.gp = gp;
+        arial_40 = new Font("Arial", Font.PLAIN, 40);
+    }
+
+    public void showMessage(String text) {
+        message = text;
+        messageOn = true;
+    }
+
+    public void draw(Graphics2D g2) {
+        this.g2 = g2;
+        g2.setFont(arial_40);
+        g2.setColor(Color.white);
+
+        // PLAY STATE
+        if(gp.gameState == gp.playState) {
+            drawPlayerLife();
+        }
+        // CHARACTER STATE (Menu)
+        if(gp.gameState == gp.characterState) {
+            drawCharacterScreen();
+        }
+        // BATTLE STATE
+        if(gp.gameState == gp.battleState) {
+            drawPlayerLife();
+            drawBattleScreen();
+        }
+
+        // MESSAGE OVERLAY
+        if(messageOn == true) {
+            g2.setFont(g2.getFont().deriveFont(30F));
+            g2.drawString(message, gp.tileSize/2, gp.tileSize*5);
+            messageCounter++;
+            if(messageCounter > 120) {
+                messageCounter = 0;
+                messageOn = false;
+            }
+        }
+    }
+
+    public void drawCharacterScreen() {
+        
+        // CHECK SUBSTATE
+        if(subState == 0) {
+            drawMenuWindow();
+        }
+        else if(subState == 1) {
+            drawStatusWindow();
+        }
+        else if(subState == 2) {
+            drawInventoryWindow();
+        }
+    }
+
+    public void drawMenuWindow() {
+        // --- POKEMON STYLE RIGHT-SIDE MENU ---
+        
+        // Dimensions
+        int frameWidth = gp.tileSize * 3;
+        int frameHeight = gp.tileSize * 4;
+        int frameX = gp.screenWidth - frameWidth - gp.tileSize; // 1 tile from right edge
+        int frameY = gp.tileSize; // 1 tile from top
+        
+        drawSubWindow(frameX, frameY, frameWidth, frameHeight);
+        
+        // Text Settings
+        g2.setColor(Color.white);
+        g2.setFont(g2.getFont().deriveFont(28F));
+        
+        int textX = frameX + 20;
+        int textY = frameY + gp.tileSize;
+        int lineHeight = 40;
+        
+        // OPTIONS
+        g2.drawString("Status", textX, textY);
+        if(commandNum == 0) g2.drawString(">", textX - 15, textY);
+        
+        textY += lineHeight;
+        g2.drawString("Bag", textX, textY);
+        if(commandNum == 1) g2.drawString(">", textX - 15, textY);
+        
+        textY += lineHeight;
+        g2.drawString("Save", textX, textY);
+        if(commandNum == 2) g2.drawString(">", textX - 15, textY);
+        
+        textY += lineHeight;
+        g2.drawString("Close", textX, textY);
+        if(commandNum == 3) g2.drawString(">", textX - 15, textY);
+    }
+
+    public void drawStatusWindow() {
+        
+        // Center the Status Window
+        int frameWidth = gp.tileSize * 10;
+        int frameHeight = gp.tileSize * 10;
+        int frameX = (gp.screenWidth - frameWidth) / 2;
+        int frameY = gp.tileSize;
+
+        drawSubWindow(frameX, frameY, frameWidth, frameHeight);
+        
+        g2.setColor(Color.white);
+        g2.setFont(g2.getFont().deriveFont(30F));
+        
+        int textX = frameX + 30;
+        int textY = frameY + gp.tileSize;
+        int lineHeight = 40;
+
+        g2.drawString("Level", textX, textY);
+        g2.drawString(String.valueOf(gp.player.level), textX + 150, textY);
+        textY += lineHeight;
+
+        g2.drawString("Life", textX, textY);
+        g2.drawString(gp.player.life + "/" + gp.player.maxLife, textX + 150, textY);
+        textY += lineHeight;
+        
+        g2.drawString("Strength", textX, textY);
+        g2.drawString(String.valueOf(gp.player.strength), textX + 150, textY);
+        textY += lineHeight;
+        
+        g2.drawString("Dexterity", textX, textY);
+        g2.drawString(String.valueOf(gp.player.dexterity), textX + 150, textY);
+        textY += lineHeight;
+        
+        g2.drawString("Attack", textX, textY);
+        g2.drawString(String.valueOf(gp.player.atk), textX + 150, textY);
+        textY += lineHeight;
+        
+        g2.drawString("Defense", textX, textY);
+        g2.drawString(String.valueOf(gp.player.def), textX + 150, textY);
+        textY += lineHeight;
+        
+        g2.drawString("Exp", textX, textY);
+        g2.drawString(String.valueOf(gp.player.exp), textX + 150, textY);
+        textY += lineHeight;
+        
+        g2.drawString("Coin", textX, textY);
+        g2.drawString(String.valueOf(gp.player.coin), textX + 150, textY);
+        textY += lineHeight + 20;
+        
+        g2.drawString("Weapon", textX, textY);
+        if(gp.player.currentWeapon != null) {
+            g2.drawString(gp.player.currentWeapon.name, textX + 150, textY);
+        } else {
+             g2.drawString("None", textX + 150, textY);
+        }
+        textY += lineHeight;
+        
+        g2.drawString("Shield", textX, textY);
+        if(gp.player.currentShield != null) {
+            g2.drawString(gp.player.currentShield.name, textX + 150, textY);
+        } else {
+             g2.drawString("None", textX + 150, textY);
+        }
+
+        // Back Hint
+        g2.setFont(g2.getFont().deriveFont(20F));
+        g2.drawString("[Press ESC to Return]", frameX + 20, frameY + frameHeight - 20);
+    }
+
+    public void drawInventoryWindow() {
+        
+        // Center the Bag Window
+        int frameWidth = gp.tileSize * 10;
+        int frameHeight = gp.tileSize * 8;
+        int frameX = (gp.screenWidth - frameWidth) / 2;
+        int frameY = gp.tileSize;
+
+        drawSubWindow(frameX, frameY, frameWidth, frameHeight);
+
+        // SLOTS
+        final int slotXstart = frameX + 20;
+        final int slotYstart = frameY + 20;
+        int slotX = slotXstart;
+        int slotY = slotYstart;
+        int slotSize = gp.tileSize + 3;
+
+        // DRAW ITEMS
+        for(int i = 0; i < gp.player.inventory.size(); i++) {
+            
+            // Highlight Cursor
+            if(i == getItemIndexOnSlot()) {
+                 g2.setColor(new Color(240,190,90));
+                 g2.setStroke(new BasicStroke(3));
+                 g2.drawRoundRect(slotX, slotY, gp.tileSize, gp.tileSize, 10, 10);
+            }
+            
+            // Draw Item
+            if(gp.player.inventory.get(i) != null) {
+                // Safety check for null images
+                if(gp.player.inventory.get(i).down1 != null) {
+                    g2.drawImage(gp.player.inventory.get(i).down1, slotX, slotY, null);
+                } else {
+                    // Placeholder for invisible items
+                    g2.setColor(Color.white);
+                    g2.setFont(g2.getFont().deriveFont(20F));
+                    g2.drawString("?", slotX + 12, slotY + 30);
+                }
+            }
+            
+            slotX += slotSize;
+            
+            // Grid Break (5 items per row)
+            if(i % 5 == 4) {
+                slotX = slotXstart;
+                slotY += slotSize;
+            }
+        }
+        
+        // DESCRIPTION BOX (Separate window below the bag)
+        int itemIndex = getItemIndexOnSlot();
+        if(itemIndex < gp.player.inventory.size()) {
+            
+            int dFrameY = frameY + frameHeight + 10;
+            int dFrameHeight = gp.tileSize * 3;
+            
+            drawSubWindow(frameX, dFrameY, frameWidth, dFrameHeight);
+            
+            int textX = frameX + 20;
+            int textY = dFrameY + 40;
+            g2.setColor(Color.white);
+            g2.setFont(g2.getFont().deriveFont(20F));
+            
+            Entity item = gp.player.inventory.get(itemIndex);
+            
+            // Draw Name
+            g2.setFont(g2.getFont().deriveFont(Font.BOLD, 22F));
+            g2.drawString(item.name, textX, textY);
+            textY += 30;
+            
+            // Draw Description
+            g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 18F));
+            for(String line : item.description.split("\n")) {
+                g2.drawString(line, textX, textY);
+                textY += 25;
+            }
+        }
+    }
+    
+    // Kept for structure
+    public void drawInventory(Graphics2D g2) { } 
+
+    public int getItemIndexOnSlot() {
+        int itemIndex = slotCol + (slotRow * 5);
+        return itemIndex;
+    }
+
+    public void drawSubWindow(int x, int y, int width, int height) {
+        // Black Background
+        Color c = new Color(0,0,0, 220);
+        g2.setColor(c);
+        g2.fillRoundRect(x, y, width, height, 35, 35);
+        
+        // White Border
+        c = new Color(255,255,255);
+        g2.setColor(c);
+        g2.setStroke(new BasicStroke(5));
+        g2.drawRoundRect(x+5, y+5, width-10, height-10, 25, 25);
+    }
+    
+    public void drawPlayerLife() {
+        // Keep your existing drawPlayerLife code here
+        int x = gp.tileSize/2;
+        int y = gp.tileSize/2;
+        int width = gp.tileSize * 5; 
+        int height = 20; 
+
+        g2.setColor(new Color(35, 35, 35));
+        g2.fillRect(x, y, width, height);
+
+        g2.setColor(new Color(255, 0, 30));
+        int currentBarWidth = (int)(((double)gp.player.life / (double)gp.player.maxLife) * width);
+        g2.fillRect(x, y, currentBarWidth, height);
+
+        g2.setColor(Color.white);
+        g2.setStroke(new BasicStroke(2));
+        g2.drawRect(x, y, width, height);
+        
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 16F));
+        g2.drawString("HP: " + gp.player.life + "/" + gp.player.maxLife, x, y - 5);
+    }
+
+    public void drawBattleScreen() {
+        // Keep your existing battle code here
+        g2.setColor(new Color(0,0,0));
+        g2.fillRect(0,0,gp.screenWidth, gp.screenHeight);
+
+        int monsterIndex = gp.currentBattleMonsterIndex;
+        if(monsterIndex != 999 && gp.monsters[monsterIndex] != null) {
+            int monsterX = gp.screenWidth/2 - (gp.tileSize*2);
+            int monsterY = gp.tileSize; 
+            g2.drawImage(gp.monsters[monsterIndex].down1, monsterX, monsterY, gp.tileSize*4, gp.tileSize*4, null);
+            
+            g2.setFont(g2.getFont().deriveFont(Font.BOLD, 24F));
+            g2.setColor(Color.white);
+            String hpText = "HP: " + gp.monsters[monsterIndex].life + "/" + gp.monsters[monsterIndex].maxLife;
+            int textLength = (int)g2.getFontMetrics().getStringBounds(hpText, g2).getWidth();
+            g2.drawString(hpText, gp.screenWidth/2 - textLength/2, monsterY - 10);
+        }
+
+        int frameX = gp.tileSize * 2; 
+        int frameHeight = gp.tileSize * 4; 
+        int frameY = gp.screenHeight - frameHeight; 
+        int frameWidth = gp.screenWidth - (gp.tileSize * 4); 
+
+        drawSubWindow(frameX, frameY, frameWidth, frameHeight);
+
+        g2.setColor(Color.white);
+        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 28F));
+
+        int textX = frameX + 40;
+        int textY = frameY + gp.tileSize; 
+        int lineHeight = 40; 
+
+        g2.drawString("Attack", textX, textY);
+        if(commandNum == 0) g2.drawString(">", textX - 25, textY);
+
+        textY += lineHeight;
+        g2.drawString("Bag", textX, textY);
+        if(commandNum == 1) g2.drawString(">", textX - 25, textY);
+
+        textY += lineHeight;
+        g2.drawString("Run", textX, textY);
+        if(commandNum == 2) g2.drawString(">", textX - 25, textY);
+    }
+}

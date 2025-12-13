@@ -7,7 +7,7 @@ import main.GamePanel;
 
 public class Entity {
 
-    GamePanel gp; // (Optional: useful if Entity needs access to game settings)
+    public GamePanel gp; // (Optional: useful if Entity needs access to game settings)
 
     // COORDINATES AND SPEED
     public int worldX, worldY;
@@ -30,9 +30,41 @@ public class Entity {
     // AI / COUNTERS
     public int actionLockCounter = 0;
 
-    // TYPE (0 = player, 1 = npc, 2 = monster)
-    // THIS WAS THE MISSING VARIABLE CAUSING YOUR ERROR
+    // CHARACTER STATUS
+    public String name;
+    public int maxLife;
+    public int life;
+    public int level;
+    public int strength;
+    public int dexterity;
+    public int atk;
+    public int def;
+    public int exp;
+    public int nextLevelExp;
+    public int coin;
+    public Entity currentWeapon;
+    public Entity currentShield;
+
+    // ITEM/OBJECTS ATTRIBUTES
+    public String description = "";
+    public int attackValue;
+    public int defenseValue;
+
+    // ITEM TYPES
     public int type; 
+    public final int type_player = 0;
+    public final int type_npc = 1;
+    public final int type_monster = 2;
+    public final int type_sword = 3;
+    public final int type_axe = 4;
+    public final int type_shield = 5;
+    public final int type_consumable = 6;
+    public final int type_pickupOnly = 7;
+    public final int type_crafting = 8;
+
+    public Entity(GamePanel gp) {
+        this.gp = gp;
+    }
 
     // METHODS
     public void setAction() {}
@@ -40,8 +72,17 @@ public class Entity {
     public void update() {
         setAction();
         collisionOn = false;
-        // Logic will be handled by specific classes or overridden
+        
+        if(collisionOn == false) {
+            switch(direction) {
+                case "up": worldY -= speed; break;
+                case "down": worldY += speed; break;
+                case "left": worldX -= speed; break;
+                case "right": worldX += speed; break;
+            }
+        }
     }
+    
 
     // Move the draw method here so Monsters can use it too!
     public void draw(Graphics2D g2, GamePanel gp) {

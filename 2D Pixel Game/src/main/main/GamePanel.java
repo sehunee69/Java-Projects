@@ -29,15 +29,28 @@ public class GamePanel extends JPanel implements Runnable{
     public final int maxWorldWidth = tileSize * maxWorldCol;
     public final int maxWorldHeight = tileSize * maxWorldRow;
 
+    //GAME STATE
+    public int gameState;
+    public final int playState = 1;
+    public final int battleState = 2;
+    public final int characterState = 3;
 
+    // BATTLE VARS
+    public int currentBattleMonsterIndex;
+    public int battlePhase; // 0 = Player Turn, 1 = Enemy Turn
+    int battleTurnCounter = 0; // Timer for enemy attack delay
+
+    //UI
+    public UI ui = new UI(this);
     int FPS = 60;
 
     TileManager tileM = new TileManager(this); 
-    KeyHandler keyH = new KeyHandler();
+    KeyHandler keyH = new KeyHandler(this);
     Thread gameThread;
     public CollisionChecker cChecker = new CollisionChecker(this);
     public Player player = new Player(this, keyH);
     public Entity monsters[] = new Entity[20];
+    public Entity obj[] = new Entity[10]; // Objects
     AssetSetter aSetter = new AssetSetter(this);
 
     public GamePanel() {
@@ -53,7 +66,9 @@ public class GamePanel extends JPanel implements Runnable{
     public void setupGame() {
 
         aSetter.setMonster();
-
+        aSetter.setObject();
+        gameState = playState;
+        
     }
 
 
@@ -105,6 +120,36 @@ public class GamePanel extends JPanel implements Runnable{
                 monsters[i].update();
             }
         }
+
+        if(gameState == battleState) {
+            // ENEMY TURN LOGIC
+            if(battlePhase == 1) {
+                battleTurnCounter++;
+                
+                // Wait 60 frames (1 second) then monster attacks
+                if(battleTurnCounter > 60) {
+                    
+                    Entity monster = monsters[currentBattleMonsterIndex];
+                    
+                    // Simple Damage Calculation
+                    int damage = monster.atk - player.def;
+                    if(damage < 0) damage = 0;
+                    
+                    player.life -= damage;
+                    ui.showMessage(monster.name + " attacks! You took " + damage + " dmg!");
+                    
+                    // Reset to Player Turn
+                    battlePhase = 0; 
+                    battleTurnCounter = 0;
+                    
+                    // Check Game Over (Optional)
+                    if(player.life <= 0) {
+                        // gameState = gameOverState; (Future implementation)
+                        ui.showMessage("You died...");
+                    }
+                }
+            }
+        }
     }
     
 
@@ -123,7 +168,15 @@ public class GamePanel extends JPanel implements Runnable{
                 monsters[i].draw(g2, this); 
             }
         }
+
+        for(int i = 0; i < obj.length; i++) {
+            if(obj[i] != null) {
+                obj[i].draw(g2, this);
+            }
+        }
+        
         player.draw(g2);
+        ui.draw(g2);
         g2.dispose();
     }
 }
