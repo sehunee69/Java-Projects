@@ -47,14 +47,14 @@
             try {
                 // Loading same logic as player for now
                 // up1 = ImageIO.read(getClass().getResourceAsStream("/monster/slime_down_1.png"));
-                up1 = ImageIO.read(getClass().getResourceAsStream("/player/boy_up_1.png"));
-                up2 = ImageIO.read(getClass().getResourceAsStream("/player/boy_up_2.png"));
-                down1 = ImageIO.read(getClass().getResourceAsStream("/player/boy_down_1.png"));
-                down2 = ImageIO.read(getClass().getResourceAsStream("/player/boy_down_2.png"));
-                left1 = ImageIO.read(getClass().getResourceAsStream("/player/boy_left_1.png"));
-                left2 = ImageIO.read(getClass().getResourceAsStream("/player/boy_left_2.png"));
-                right1 = ImageIO.read(getClass().getResourceAsStream("/player/boy_right_1.png"));
-                right2 = ImageIO.read(getClass().getResourceAsStream("/player/boy_right_2.png"));
+                up1 = ImageIO.read(getClass().getResourceAsStream("/entity/monster/slime/slime-back1.png"));
+                up2 = ImageIO.read(getClass().getResourceAsStream("/entity/monster/slime/slime-back2.png"));
+                down1 = ImageIO.read(getClass().getResourceAsStream("/entity/monster/slime/slime-front1.png"));
+                down2 = ImageIO.read(getClass().getResourceAsStream("/entity/monster/slime/slime-front2.png"));
+                left1 = ImageIO.read(getClass().getResourceAsStream("/entity/monster/slime/slime-left1.png"));
+                left2 = ImageIO.read(getClass().getResourceAsStream("/entity/monster/slime/slime-left2.png"));
+                right1 = ImageIO.read(getClass().getResourceAsStream("/entity/monster/slime/slime-right1.png"));
+                right2 = ImageIO.read(getClass().getResourceAsStream("/entity/monster/slime/slime-right2.png"));
 
             } catch(Exception e) {
                 e.printStackTrace();

@@ -5,12 +5,17 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import entity.Entity;
+import java.awt.image.BufferedImage;
+import java.io.IOException;            
+import javax.imageio.ImageIO;
 
 public class UI {
 
     GamePanel gp;
     Graphics2D g2;
     Font arial_40;
+
+    BufferedImage battleBackground;
     
     // VARIABLES
     public boolean messageOn = false;
@@ -28,7 +33,14 @@ public class UI {
     public UI(GamePanel gp) {
         this.gp = gp;
         arial_40 = new Font("Arial", Font.PLAIN, 40);
+
+        try {
+            battleBackground = ImageIO.read(getClass().getResourceAsStream("/battleScenes/grass-battleScene.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+    
 
     public void showMessage(String text) {
         message = text;
@@ -308,9 +320,15 @@ public class UI {
     }
 
     public void drawBattleScreen() {
-        // Keep your existing battle code here
-        g2.setColor(new Color(0,0,0));
-        g2.fillRect(0,0,gp.screenWidth, gp.screenHeight);
+        
+        // 1. DRAW BACKGROUND IMAGE (Replaces the black rectangle)
+        if (battleBackground != null) {
+            g2.drawImage(battleBackground, 0, 0, gp.screenWidth, gp.screenHeight, null);
+        } else {
+            // Fallback to black if image is missing
+            g2.setColor(new Color(0,0,0));
+            g2.fillRect(0,0,gp.screenWidth, gp.screenHeight);
+        }
 
         int monsterIndex = gp.currentBattleMonsterIndex;
         if(monsterIndex != 999 && gp.monsters[monsterIndex] != null) {
