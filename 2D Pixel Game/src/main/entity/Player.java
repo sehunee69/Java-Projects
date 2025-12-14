@@ -167,6 +167,7 @@ public class Player extends Entity{
             String text = "";
             if(inventory.size() != maxInventorySize) {
                 inventory.add(gp.obj[i]);
+                gp.playSE(1);
                 gp.ui.showMessage("Got a " + gp.obj[i].name + "!");
                 gp.obj[i] = null;
             } else {
@@ -235,7 +236,9 @@ public class Player extends Entity{
 
     public void interactMonster(int i) {
         if(i != 999) {
-            gp.gameState = gp.battleState;
+            gp.gameState = gp.transitionState;
+            gp.transitionCounter = 0;
+
             gp.currentBattleMonsterIndex = i;
             gp.player.direction = "up";
 

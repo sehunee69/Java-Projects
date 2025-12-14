@@ -34,11 +34,17 @@ public class GamePanel extends JPanel implements Runnable{
     public final int playState = 1;
     public final int battleState = 2;
     public final int characterState = 3;
+    public final int transitionState = 4;
 
     // BATTLE VARS
     public int currentBattleMonsterIndex;
     public int battlePhase; // 0 = Player Turn, 1 = Enemy Turn
     int battleTurnCounter = 0; // Timer for enemy attack delay
+    public int transitionCounter = 0;
+
+    // SOUNDS
+    Sound music = new Sound();
+    Sound se = new Sound(); // For Sound Effects later
 
     //UI
     public UI ui = new UI(this);
@@ -67,6 +73,8 @@ public class GamePanel extends JPanel implements Runnable{
 
         aSetter.setMonster();
         aSetter.setObject();
+        playMusic(0);
+
         gameState = playState;
         
     }
@@ -113,11 +121,19 @@ public class GamePanel extends JPanel implements Runnable{
 
     public void update() {
 
-        player.update();
-
-        for(int i = 0; i < monsters.length; i++) {
-            if(monsters[i] != null) {
-                monsters[i].update();
+        if(gameState == playState) {
+            player.update();
+            for(int i = 0; i < monsters.length; i++) {
+                if(monsters[i] != null) monsters[i].update();
+            }
+        }
+        
+        // --- TRANSITION STATE UPDATE ---
+        if(gameState == transitionState) {
+            transitionCounter++;
+            if(transitionCounter > 60) { // Animation plays for 1 second (60 frames)
+                transitionCounter = 0;
+                gameState = battleState; // Switch to actual battle
             }
         }
 
@@ -178,5 +194,21 @@ public class GamePanel extends JPanel implements Runnable{
         player.draw(g2);
         ui.draw(g2);
         g2.dispose();
+    }
+
+    public void playMusic(int i) {
+        music.setFile(i);
+        music.play();
+        music.loop(); // Background music should loop
+    }
+
+    public void stopMusic() {
+        music.stop();
+    }
+
+    public void playSE(int i) {
+        // Sound effects (SE) don't loop
+        se.setFile(i);
+        se.play();
     }
 }

@@ -65,6 +65,10 @@ public class UI {
             drawPlayerLife();
             drawBattleScreen();
         }
+        //TRANSITION STATE
+        if(gp.gameState == gp.transitionState) {
+            drawTransition();
+        }
 
         // MESSAGE OVERLAY
         if(messageOn == true) {
@@ -367,5 +371,36 @@ public class UI {
         textY += lineHeight;
         g2.drawString("Run", textX, textY);
         if(commandNum == 2) g2.drawString(">", textX - 25, textY);
+    }
+
+    public void drawTransition() {
+        
+        g2.setColor(new Color(0,0,0));
+        
+        // Effect 1: Rapid Flashing (0 to 30 frames)
+        if(gp.transitionCounter < 30) {
+            // Flash every 5 frames
+            if(gp.transitionCounter % 5 == 0) {
+                g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+            }
+        }
+        // Effect 2: Screen Wipe / Curtain Close (30 to 60 frames)
+        else {
+            // Calculate how much the "curtains" have closed
+            // Total animation time = 30 frames (60-30)
+            // We need to cover half the screen height (top down) and half (bottom up)
+            
+            int animationProgress = gp.transitionCounter - 30;
+            int maxFrames = 30;
+            
+            // Calculate height of the black bar
+            int barHeight = (int) (gp.screenHeight / 2 * ((double)animationProgress / maxFrames));
+            
+            // Draw Top Bar going Down
+            g2.fillRect(0, 0, gp.screenWidth, barHeight);
+            
+            // Draw Bottom Bar going Up
+            g2.fillRect(0, gp.screenHeight - barHeight, gp.screenWidth, barHeight);
+        }
     }
 }
