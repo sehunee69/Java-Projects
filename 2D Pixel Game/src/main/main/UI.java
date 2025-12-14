@@ -30,6 +30,9 @@ public class UI {
     // SUBSTATE: 0 = Menu Select, 1 = Status, 2 = Bag
     public int subState = 0; 
 
+    // DIALOGUE
+    public String currentDialogue = "";
+
     public UI(GamePanel gp) {
         this.gp = gp;
         arial_40 = new Font("Arial", Font.PLAIN, 40);
@@ -79,6 +82,10 @@ public class UI {
                 messageCounter = 0;
                 messageOn = false;
             }
+        }
+
+        if(gp.gameState == gp.dialogueState) {
+            drawDialogueWindow();
         }
     }
 
@@ -419,6 +426,26 @@ public class UI {
             
             // Draw Bottom Bar going Up
             g2.fillRect(0, gp.screenHeight - barHeight, gp.screenWidth, barHeight);
+        }
+    }
+
+    public void drawDialogueWindow() {
+    
+        int x = gp.tileSize * 2;
+        int y = gp.tileSize / 2;
+        int width = gp.screenWidth - (gp.tileSize * 4);
+        int height = gp.tileSize * 4;
+
+        drawSubWindow(x, y, width, height);
+
+        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 28F));
+        x += gp.tileSize;
+        y += gp.tileSize;
+
+        // Split text by \n so it doesn't run off screen
+        for(String line : currentDialogue.split("\n")) {
+            g2.drawString(line, x, y);
+            y += 40;
         }
     }
 }

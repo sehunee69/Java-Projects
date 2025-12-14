@@ -2,6 +2,8 @@ package main;
 
 import entity.monster.MON_GreenSlime;
 import entity.monster.MON_Soldier;
+import entity.npc.NPC_OldMan;
+import entity.npc.NPC_Standing;
 import obj.OBJ_Water;
 
 public class AssetSetter {
@@ -85,5 +87,19 @@ public class AssetSetter {
         gp.obj[2] = new OBJ_Water(gp);
         gp.obj[2].worldX = gp.tileSize * 26; 
         gp.obj[2].worldY = gp.tileSize * 26;
+    }
+
+    public void setNPC() {
+
+        int npcX = gp.tileSize * 33;
+        int npcY = gp.tileSize * 8;
+        // Spawn at col 21, row 21 (Change these to where you want him)
+        gp.npc[0] = new NPC_OldMan(gp, npcX, npcY);
+        gp.npc[0].worldX = npcX;
+        gp.npc[0].worldY = npcY;
+
+        gp.npc[1] = new NPC_Standing(gp);
+        gp.npc[1].worldX = gp.tileSize * 15; // Set location here
+        gp.npc[1].worldY = gp.tileSize * 15;
     }
 }

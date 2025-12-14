@@ -134,6 +134,10 @@ public class Player extends Entity{
         int objIndex = gp.cChecker.checkObject(this, true); // We need to create this method next
         pickUpObject(objIndex);
 
+        // CHECK NPC COLLISION
+        int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
+        interactNPC(npcIndex);
+
         //IF FALSE, PLAYER CAN MOVE
         if(collisionOn == false) {
 
@@ -262,6 +266,23 @@ public class Player extends Entity{
             }
         }
     }
+
+    public void interactNPC(int i) {
+    if(i != 999) {
+        // If index is not 999, we are touching an NPC.
+        // If we are touching them, we don't want to walk through.
+        
+        // However, usually checkEntity sets 'collisionOn' to true automatically inside CollisionChecker.
+        // So just by calling checkEntity above, physical collision should work!
+        
+        // This method is mostly for if you want to trigger dialogue by bumping into them
+        // (Optional: bumping triggers dialogue)
+        if(gp.keyH.enterPressed == true) {
+            // gp.gameState = gp.dialogueState;
+            // gp.npc[i].speak();
+        }
+    }
+}
 
     public void draw(Graphics2D g2) {
 

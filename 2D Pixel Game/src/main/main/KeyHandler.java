@@ -7,7 +7,7 @@ import entity.Entity;
 public class KeyHandler implements KeyListener{
 
     GamePanel gp;
-    public boolean upPressed, downPressed, leftPressed, rightPressed;
+    public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed;
 
     public KeyHandler(GamePanel gp) {
         this.gp = gp;
@@ -29,7 +29,24 @@ public class KeyHandler implements KeyListener{
             if(code == KeyEvent.VK_A) leftPressed = true;
             if(code == KeyEvent.VK_D) rightPressed = true;
             if(code == KeyEvent.VK_C) gp.gameState = gp.characterState;
+            if(code == KeyEvent.VK_ENTER) enterPressed = true;
             if(code == KeyEvent.VK_ENTER) { /* Interact logic */ }
+
+            if(code == KeyEvent.VK_E) {
+            // Check if NPC is in front of player
+                int npcIndex = gp.cChecker.checkEntity(gp.player, gp.npc);
+                if(npcIndex != 999) {
+                    gp.currentNPCIndex = npcIndex;
+                    gp.npc[npcIndex].speak();
+                }
+            }
+        } 
+        else if(gp.gameState == gp.dialogueState) {
+            if(code == KeyEvent.VK_ENTER || code == KeyEvent.VK_E) {
+                if(code == KeyEvent.VK_ENTER || code == KeyEvent.VK_E) {
+                    gp.npc[gp.currentNPCIndex].speak();
+                }
+            }
         }
         
         // 2. CHARACTER STATE (Menu Hub)
@@ -177,6 +194,7 @@ public class KeyHandler implements KeyListener{
             rightPressed = false;
         }
         
+        if(code == KeyEvent.VK_ENTER) enterPressed = false;
     }
 
 }

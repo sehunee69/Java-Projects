@@ -63,6 +63,9 @@ public class Entity {
     public final int type_pickupOnly = 7;
     public final int type_crafting = 8;
 
+    public String dialogues[] = new String[20];
+    int dialogueIndex = 0;
+
     public Entity(GamePanel gp) {
         this.gp = gp;
     }
@@ -75,6 +78,10 @@ public class Entity {
         collisionOn = false;
 
         gp.cChecker.checkTile(this);
+
+        boolean contactPlayer = gp.cChecker.checkPlayer(this);
+        gp.cChecker.checkEntity(this, gp.npc);
+        gp.cChecker.checkEntity(this, gp.monsters);
         
         if(collisionOn == false) {
             switch(direction) {
@@ -96,6 +103,27 @@ public class Entity {
             }
 
             spriteCounter = 0;
+        }
+    }
+
+    public void speak() {
+    // If we run out of text, reset (or you can stop interacting)
+        if(dialogues[dialogueIndex] == null) {
+            dialogueIndex = 0; // Reset for next time
+            gp.gameState = gp.playState; // CLOSE THE WINDOW
+        } 
+        else {
+            gp.ui.currentDialogue = dialogues[dialogueIndex]; // Show current line
+            dialogueIndex++; // Prepare for next line
+            gp.gameState = gp.dialogueState; // OPEN THE WINDOW
+        }
+
+        // Turn NPC to face player
+        switch(gp.player.direction) {
+            case "up": direction = "down"; break;
+            case "down": direction = "up"; break;
+            case "left": direction = "right"; break;
+            case "right": direction = "left"; break;
         }
     }
     

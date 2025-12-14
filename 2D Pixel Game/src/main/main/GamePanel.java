@@ -37,6 +37,7 @@ public class GamePanel extends JPanel implements Runnable{
     public final int battleState = 2;
     public final int characterState = 3;
     public final int transitionState = 4;
+    public final int dialogueState = 5;
 
     // BATTLE VARS
     public int currentBattleMonsterIndex;
@@ -51,14 +52,16 @@ public class GamePanel extends JPanel implements Runnable{
     //UI
     public UI ui = new UI(this);
     int FPS = 60;
+    public int currentNPCIndex;
 
     TileManager tileM = new TileManager(this); 
-    KeyHandler keyH = new KeyHandler(this);
+    public KeyHandler keyH = new KeyHandler(this);
     Thread gameThread;
     public CollisionChecker cChecker = new CollisionChecker(this);
     public Player player = new Player(this, keyH);
     public Entity monsters[] = new Entity[20];
     public Entity obj[] = new Entity[10]; // Objects
+    public Entity npc[] = new Entity[10];
     AssetSetter aSetter = new AssetSetter(this);
 
     public GamePanel() {
@@ -75,6 +78,7 @@ public class GamePanel extends JPanel implements Runnable{
 
         aSetter.setMonster();
         aSetter.setObject();
+        aSetter.setNPC();
         playMusic(0);
 
         gameState = playState;
@@ -125,6 +129,13 @@ public class GamePanel extends JPanel implements Runnable{
 
         if(gameState == playState) {
             player.update();
+
+            for(int i = 0; i < npc.length; i++) {
+                if(npc[i] != null) {
+                    npc[i].update();
+                }
+            }
+
             for(int i = 0; i < monsters.length; i++) {
                 if(monsters[i] != null) monsters[i].update();
             }
@@ -178,6 +189,13 @@ public class GamePanel extends JPanel implements Runnable{
         Graphics2D g2 = (Graphics2D)g;
 
         tileM.draw(g2);
+
+        for(int i = 0; i < npc.length; i++) {
+            if(npc[i] != null) {
+                npc[i].draw(g2, this);
+            }
+        }
+
         for(int i = 0; i < monsters.length; i++) {
             if(monsters[i] != null) {
                 // We need to implement a generic draw method in Entity or cast it
