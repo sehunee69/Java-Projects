@@ -203,54 +203,74 @@ public class UI {
 
     public void drawInventoryWindow() {
         
-        // Center the Bag Window
-        int frameWidth = gp.tileSize * 10;
-        int frameHeight = gp.tileSize * 8;
-        int frameX = (gp.screenWidth - frameWidth) / 2;
-        int frameY = gp.tileSize;
+        // 1. CALCULATE WINDOW SIZE (9x2 Grid)
+        // 9 items wide needs about 10-11 tiles of width
+        // 2 items high needs about 3-4 tiles of height
+        int frameWidth = gp.tileSize * 11; 
+        int frameHeight = gp.tileSize * 4; 
+        int frameX = (gp.screenWidth - frameWidth) / 2; // Center X
+        int frameY = gp.tileSize; // Top Y
 
+        // 2. DRAW THE WINDOW BACKGROUND
         drawSubWindow(frameX, frameY, frameWidth, frameHeight);
 
-        // SLOTS
-        final int slotXstart = frameX + 20;
-        final int slotYstart = frameY + 20;
+        // 3. SLOT ALIGNMENT
+        // spacing between slots
+        int slotSize = gp.tileSize + 3; 
+        
+        // Math to center the grid inside the window:
+        // Window Width - (9 slots * size) / 2 = Left Margin
+        int totalSlotWidth = 9 * slotSize;
+        int startXpadding = (frameWidth - totalSlotWidth) / 2;
+        
+        final int slotXstart = frameX + startXpadding;
+        final int slotYstart = frameY + gp.tileSize; // Padding from top
+        
+        int itemSize = (int)(gp.tileSize * 0.9);
+        int offset = (gp.tileSize - itemSize) / 2; // Math to center it
+
         int slotX = slotXstart;
         int slotY = slotYstart;
-        int slotSize = gp.tileSize + 3;
 
-        // DRAW ITEMS
-        for(int i = 0; i < gp.player.inventory.size(); i++) {
+        // 4. DRAW SLOTS & ITEMS
+        for(int i = 0; i < gp.player.maxInventorySize; i++) {
             
-            // Highlight Cursor
+            // A. DRAW EMPTY SLOT OUTLINE
+            g2.setColor(new Color(255, 255, 255, 120)); 
+            g2.setStroke(new BasicStroke(1)); 
+            g2.drawRoundRect(slotX, slotY, gp.tileSize, gp.tileSize, 10, 10);
+
+            // B. HIGHLIGHT CURSOR
             if(i == getItemIndexOnSlot()) {
                  g2.setColor(new Color(240,190,90));
-                 g2.setStroke(new BasicStroke(3));
+                 g2.setStroke(new BasicStroke(3)); 
                  g2.drawRoundRect(slotX, slotY, gp.tileSize, gp.tileSize, 10, 10);
             }
             
-            // Draw Item
-            if(gp.player.inventory.get(i) != null) {
-                // Safety check for null images
-                if(gp.player.inventory.get(i).down1 != null) {
-                    g2.drawImage(gp.player.inventory.get(i).down1, slotX, slotY, null);
-                } else {
-                    // Placeholder for invisible items
-                    g2.setColor(Color.white);
-                    g2.setFont(g2.getFont().deriveFont(20F));
-                    g2.drawString("?", slotX + 12, slotY + 30);
+            // C. DRAW ITEM
+            if(i < gp.player.inventory.size()) {
+                if(gp.player.inventory.get(i) != null) {
+                    if(gp.player.inventory.get(i).down1 != null) {
+                        g2.drawImage(gp.player.inventory.get(i).down1, slotX + offset, slotY + offset, itemSize, itemSize, null);
+                    } else {
+                        g2.setColor(Color.white);
+                        g2.setFont(g2.getFont().deriveFont(20F));
+                        g2.drawString("?", slotX + 12, slotY + 30);
+                    }
                 }
             }
             
+            // D. MOVE TO NEXT SLOT
             slotX += slotSize;
             
-            // Grid Break (5 items per row)
-            if(i % 5 == 4) {
+            // E. GRID BREAK (After 9 items, reset X and go down Y)
+            if(i % 9 == 8) {
                 slotX = slotXstart;
                 slotY += slotSize;
             }
         }
         
-        // DESCRIPTION BOX (Separate window below the bag)
+        // 5. DESCRIPTION BOX
         int itemIndex = getItemIndexOnSlot();
         if(itemIndex < gp.player.inventory.size()) {
             
@@ -266,12 +286,10 @@ public class UI {
             
             Entity item = gp.player.inventory.get(itemIndex);
             
-            // Draw Name
             g2.setFont(g2.getFont().deriveFont(Font.BOLD, 22F));
             g2.drawString(item.name, textX, textY);
             textY += 30;
             
-            // Draw Description
             g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 18F));
             for(String line : item.description.split("\n")) {
                 g2.drawString(line, textX, textY);
@@ -284,7 +302,7 @@ public class UI {
     public void drawInventory(Graphics2D g2) { } 
 
     public int getItemIndexOnSlot() {
-        int itemIndex = slotCol + (slotRow * 5);
+        int itemIndex = slotCol + (slotRow * 9);
         return itemIndex;
     }
 

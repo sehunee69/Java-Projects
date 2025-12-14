@@ -37,7 +37,7 @@ public class Sound {
             // Make the music more quieter
             if(i == 0) {
                 FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-                gainControl.setValue(-20.0f); 
+                gainControl.setValue(-20.0f);
             }
         } catch(Exception e) {
             e.printStackTrace();
