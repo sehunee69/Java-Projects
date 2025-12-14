@@ -235,15 +235,35 @@ public class TileManager extends Tile{
 
             int worldX = worldCol * gp.tileSize;
             int worldY = worldRow * gp.tileSize;
+
             int screenX = worldX - gp.player.worldX + gp.player.screenX;
             int screenY = worldY - gp.player.worldY + gp.player.screenY;
 
-            if(worldX + gp.tileSize > gp.player.worldX - gp.player.screenX && worldX - gp.tileSize < gp.player.worldX + gp.player.screenX
-                && worldY + gp.tileSize > gp.player.worldY - gp.player.screenY && worldY  - gp.tileSize < gp.player.worldY + gp.player.screenY) {
+            if(gp.player.worldX < gp.player.screenX) {
+            screenX = worldX;
+            }
+            if(gp.player.worldY < gp.player.screenY) {
+                screenY = worldY;
+            }
 
-                    g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+            // 2. RIGHT & BOTTOM EDGE
+            // Calculate the map width/height
+            int rightOffset = gp.screenWidth - gp.player.screenX;
+            int bottomOffset = gp.screenHeight - gp.player.screenY;
+            
+            // If player is too close to right/bottom, fix camera to max width/height
+            if(gp.player.worldX > gp.worldWidth - rightOffset) {
+                screenX = gp.screenWidth - (gp.worldWidth - worldX);
+            }
+            if(gp.player.worldY > gp.worldHeight - bottomOffset) {
+                screenY = gp.screenHeight - (gp.worldHeight - worldY);
+            }
 
-                }
+            if(screenX + gp.tileSize > 0 && screenX < gp.screenWidth && 
+                screenY + gp.tileSize > 0 && screenY < gp.screenHeight) {
+
+                g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+            }
                  
             worldCol++;
 

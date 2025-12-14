@@ -22,7 +22,7 @@ public class AssetSetter {
     int slimeCount = 0;   
     int maxSlimes = 8;
     int soldierCount = 0;
-    int maxSoldiers = 2;
+    int maxSoldiers = 1;
     
     for(int col = 0; col < gp.maxWorldCol; col++) {
         for(int row = 0; row < gp.maxWorldRow; row++) {

@@ -267,6 +267,32 @@ public class Player extends Entity{
 
         BufferedImage image = null;
 
+        // Create temporary variables for drawing position
+        int x = screenX; // Default to center
+        int y = screenY; // Default to center
+
+        // --- ADJUST PLAYER POSITION AT EDGES ---
+        
+        // 1. LEFT & TOP
+        // If we are at the edge, use our actual world coordinate instead of 'center'
+        if(worldX < screenX) {
+            x = worldX;
+        }
+        if(worldY < screenY) {
+            y = worldY;
+        }
+
+        // 2. RIGHT & BOTTOM
+        int rightOffset = gp.screenWidth - screenX;
+        int bottomOffset = gp.screenHeight - screenY;
+
+        if(worldX > gp.worldWidth - rightOffset) {
+            x = gp.screenWidth - (gp.worldWidth - worldX);
+        }
+        if(worldY > gp.worldHeight - bottomOffset) {
+            y = gp.screenHeight - (gp.worldHeight - worldY);
+        }
+
         switch(direction) {
         case "up":
             if(spriteNum == 1) image = up1;
@@ -290,6 +316,6 @@ public class Player extends Entity{
             break;
     }
 
-        g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+        g2.drawImage(image, x, y, gp.tileSize, gp.tileSize, null);
     }
 }
