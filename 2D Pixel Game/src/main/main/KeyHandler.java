@@ -31,10 +31,8 @@ public class KeyHandler implements KeyListener{
             if(code == KeyEvent.VK_C) gp.gameState = gp.characterState;
             if(code == KeyEvent.VK_ENTER) enterPressed = true;
             if(code == KeyEvent.VK_E) ePressed = true;
-            if(code == KeyEvent.VK_ENTER) { /* Interact logic */ }
-
+            
             if(code == KeyEvent.VK_E) {
-            // Check if NPC is in front of player
                 int npcIndex = gp.cChecker.checkEntity(gp.player, gp.npc[gp.currentMap]);
                 if(npcIndex != 999) {
                     gp.currentNPCIndex = npcIndex;
@@ -44,16 +42,12 @@ public class KeyHandler implements KeyListener{
         } 
         else if(gp.gameState == gp.dialogueState) {
             if(code == KeyEvent.VK_ENTER || code == KeyEvent.VK_E) {
-                if(code == KeyEvent.VK_ENTER || code == KeyEvent.VK_E) {
-                    gp.npc[gp.currentMap][gp.currentNPCIndex].speak();
-                }
+                gp.npc[gp.currentMap][gp.currentNPCIndex].speak();
             }
         }
         
         // 2. CHARACTER STATE (Menu Hub)
         else if(gp.gameState == gp.characterState) {
-            
-            // A. NAVIGATING TABS (Left Side)
             if(gp.ui.subState == 0) {
                 if(code == KeyEvent.VK_W) {
                     gp.ui.commandNum--;
@@ -64,44 +58,24 @@ public class KeyHandler implements KeyListener{
                     if(gp.ui.commandNum > 3) gp.ui.commandNum = 0;
                 }
                 if(code == KeyEvent.VK_ENTER) {
-                    if(gp.ui.commandNum == 0) {
-                        gp.ui.subState = 1; // Status
-                        gp.playSE(3);
-                    }
-                    if(gp.ui.commandNum == 1) {
-                        gp.ui.subState = 2; // Bag
-                        gp.playSE(2);
-                    }
-                    if(gp.ui.commandNum == 2) {
-                        gp.ui.subState = 0; // Options
-                        gp.playSE(3);
-                    }
-                    if(gp.ui.commandNum == 3) {
-                        gp.ui.subState = 0; // Save
-                        gp.playSE(3);
-                    }
+                    if(gp.ui.commandNum == 0) { gp.ui.subState = 1; gp.playSE(3); }
+                    if(gp.ui.commandNum == 1) { gp.ui.subState = 2; gp.playSE(2); }
+                    if(gp.ui.commandNum == 2) { gp.ui.subState = 0; gp.playSE(3); }
+                    if(gp.ui.commandNum == 3) { gp.ui.subState = 0; gp.playSE(3); }
                 }
             }
-            // B. INSIDE STATUS (Right Side)
             else if (gp.ui.subState == 1) {
                 if(code == KeyEvent.VK_ESCAPE) gp.ui.subState = 0;
             }
-            // C. INSIDE BAG (Right Side)
             else if(gp.ui.subState == 2) {
                 if(code == KeyEvent.VK_W) { if(gp.ui.slotRow != 0) gp.ui.slotRow--; }
                 if(code == KeyEvent.VK_A) { if(gp.ui.slotCol != 0) gp.ui.slotCol--; }
                 if(code == KeyEvent.VK_S) { if(gp.ui.slotRow != 1) gp.ui.slotRow++; }
                 if(code == KeyEvent.VK_D) { if(gp.ui.slotCol != 8) gp.ui.slotCol++; }
                 
-                if(code == KeyEvent.VK_ENTER) {
-                    gp.player.selectItem(); 
-                }
-                if(code == KeyEvent.VK_ESCAPE) {
-                    gp.ui.subState = 0; // Go back to tabs
-                }
+                if(code == KeyEvent.VK_ENTER) gp.player.selectItem(); 
+                if(code == KeyEvent.VK_ESCAPE) gp.ui.subState = 0; 
             }
-            
-            // Close Character Screen entirely
             if(code == KeyEvent.VK_C) {
                 gp.gameState = gp.playState;
                 gp.ui.subState = 0;
@@ -109,158 +83,183 @@ public class KeyHandler implements KeyListener{
         }
         
         // 3. BATTLE STATE
-        // 3. BATTLE STATE
         else if(gp.gameState == gp.battleState) {
-            
-            // PLAYER TURN ONLY
-            if(gp.battlePhase == 0) {
 
-                // --- SUBSTATE 0: MAIN BATTLE MENU ---
-                if(gp.ui.battleSubState == 0) {
-                    
-                    if(code == KeyEvent.VK_W) { 
-                        gp.ui.commandNum--;
-                        if(gp.ui.commandNum < 0) gp.ui.commandNum = 2;
-                        gp.playSE(3);
-                    }
-                    if(code == KeyEvent.VK_S) { 
-                        gp.ui.commandNum++;
-                        if(gp.ui.commandNum > 2) gp.ui.commandNum = 0;
-                        gp.playSE(3);
-                    }
-                    
-                    if(code == KeyEvent.VK_ENTER) {
-                        // ATTACK
-                        if(gp.ui.commandNum == 0) {
-                            int monsterIndex = gp.currentBattleMonsterIndex;
-                            Entity monster = gp.monsters[gp.currentMap][monsterIndex];
+            // --- SUBSTATE 1: INVENTORY ---
+            if (gp.ui.battleSubState == 1) {
+                if(code == KeyEvent.VK_W) { if(gp.ui.slotRow != 0) gp.ui.slotRow--; gp.playSE(3);}
+                if(code == KeyEvent.VK_A) { if(gp.ui.slotCol != 0) gp.ui.slotCol--; gp.playSE(3);}
+                if(code == KeyEvent.VK_S) { if(gp.ui.slotRow != 3) gp.ui.slotRow++; gp.playSE(3);}
+                if(code == KeyEvent.VK_D) { if(gp.ui.slotCol != 4) gp.ui.slotCol++; gp.playSE(3);}
+                if(code == KeyEvent.VK_ENTER) gp.player.selectItem();
+                if(code == KeyEvent.VK_ESCAPE) gp.ui.battleSubState = 0;
+                return; 
+            }
 
-                            monster.shakeCounter = 30; // Shake for 30 frames
-                            gp.ui.showingSlash = true; 
-                            gp.ui.slashCounter = 0;
-                            
-                            gp.playSE(6);
-                            int damage = gp.player.atk - monster.def;
-                            if(damage < 0) damage = 0;
-                            monster.life -= damage;
-                            gp.ui.showMessage("You hit " + monster.name + " for " + damage + " dmg!");
-
-                            // CHECK DEATH (Copy your existing death logic here)
-                            if(monster.life <= 0) {
-                                // 1. DROP ITEMS (Existing code)
-                                for(int j = 0; j < gp.obj[1].length; j++) {
-                                    if(gp.obj[gp.currentMap][j] == null) {
-                                        gp.obj[gp.currentMap][j] = new obj.OBJ_SlimeGoop(gp);
-                                        gp.obj[gp.currentMap][j].worldX = monster.worldX;
-                                        gp.obj[gp.currentMap][j].worldY = monster.worldY;
-                                        break; 
-                                    }
-                                }
-                                // 2. GAIN EXP (NEW!)
-                                gp.player.exp += monster.exp;
-                                gp.ui.showMessage("You killed " + monster.name + "! +" + monster.exp + " EXP");
-                                
-                                // 3. CHECK LEVEL UP (NEW!)
-                                gp.player.checkLevelUp();
-
-                                // 4. DESPAWN & END BATTLE
-                                gp.monsters[gp.currentMap][monsterIndex] = null; // Basic despawn
-                                gp.stopMusic();
-                                gp.gameState = gp.playState;
-                                gp.playMusic(0);
-                            } else {
-                                gp.battlePhase = 1; // Enemy Turn
-                            }
-                        }
-                        // BAG
-                        else if(gp.ui.commandNum == 1) { 
-                            gp.ui.battleSubState = 1; // Switch to Bag Mode
-                            gp.playSE(2);
-                        }
-                        // RUN
-                        else if(gp.ui.commandNum == 2) {
-                            gp.ui.commandNum = 0;
-                            gp.stopMusic();
-                            gp.gameState = gp.playState;
-                            gp.playMusic(0);
-                        }
-                    }
+            // --- PHASE 0: SELECT ACTION ---
+            if(gp.battlePhase == gp.PHASE_SELECT) {
+                if(code == KeyEvent.VK_W) { 
+                    gp.ui.commandNum--;
+                    if(gp.ui.commandNum < 0) gp.ui.commandNum = 2;
+                    gp.playSE(3);
+                }
+                if(code == KeyEvent.VK_S) { 
+                    gp.ui.commandNum++;
+                    if(gp.ui.commandNum > 2) gp.ui.commandNum = 0;
+                    gp.playSE(3);
                 }
                 
-                // --- SUBSTATE 1: INVENTORY SELECTION ---
-                else if (gp.ui.battleSubState == 1) {
-                    
-                    // NAVIGATE BAG (Reuse UI slots)
-                    if(code == KeyEvent.VK_W) { if(gp.ui.slotRow != 0) gp.ui.slotRow--; gp.playSE(3);}
-                    if(code == KeyEvent.VK_A) { if(gp.ui.slotCol != 0) gp.ui.slotCol--; gp.playSE(3);}
-                    if(code == KeyEvent.VK_S) { if(gp.ui.slotRow != 3) gp.ui.slotRow++; gp.playSE(3);}
-                    if(code == KeyEvent.VK_D) { if(gp.ui.slotCol != 4) gp.ui.slotCol++; gp.playSE(3);}
-                    
-                    if(code == KeyEvent.VK_ENTER) {
-                        gp.player.selectItem(); // Use the item
+                if(code == KeyEvent.VK_ENTER) {
+                    if(gp.ui.commandNum == 0) { // ATTACK
+                        int monsterIndex = gp.currentBattleMonsterIndex;
+                        Entity monster = gp.monsters[gp.currentMap][monsterIndex];
+                        monster.shakeCounter = 30;
+                        gp.ui.showingSlash = true; 
+                        gp.ui.slashCounter = 0;
+                        gp.playSE(6);
+                        
+                        int damage = gp.player.atk - monster.def;
+                        if(damage < 0) damage = 0;
+                        monster.life -= damage;
+                        
+                        gp.ui.currentDialogue = "You attacked " + monster.name + "!\n" + 
+                                                "It took " + damage + " damage.";
+                        gp.battlePhase = gp.PHASE_PLAYER_ATTACK; 
                     }
-                    
-                    // GO BACK TO MENU
-                    if(code == KeyEvent.VK_ESCAPE) {
-                        gp.ui.battleSubState = 0;
+                    else if(gp.ui.commandNum == 1) { // BAG
+                        gp.ui.battleSubState = 1; 
+                        gp.playSE(2);
+                    }
+                    else if(gp.ui.commandNum == 2) { // RUN
+                        gp.ui.commandNum = 0;
+                        gp.stopMusic();
+                        gp.gameState = gp.playState;
+                        gp.playMusic(0);
                     }
                 }
             }
-        }
+
+            // --- PHASE 1: READING PLAYER ATTACK RESULT ---
+            else if(gp.battlePhase == gp.PHASE_PLAYER_ATTACK) {
+                
+                if(code == KeyEvent.VK_ENTER) {
+                    
+                    int monsterIndex = gp.currentBattleMonsterIndex;
+                    Entity monster = gp.monsters[gp.currentMap][monsterIndex];
+
+                    // PREPARE DROP LOGIC
+                    Entity droppedItem = null;
+                    if(monster.name.equals("Green Slime")) {
+                            droppedItem = new obj.OBJ_SlimeGoop(gp);
+                    }
+                    else if(monster.name.equals("Soldier")) {
+                            droppedItem = new obj.OBJ_Sword_Sharp(gp); 
+                    }
+                    else if(monster.name.equals("Great Soldier")) {
+                            // Example: Great Soldiers drop Shields or Keys
+                    }
+
+                    // A. CHECK IF MONSTER DIED
+                    if(monster.life <= 0) {
+                        
+                        // 1. DROP ITEMS
+                        if(droppedItem != null) {
+                            for(int j = 0; j < gp.obj[1].length; j++) {
+                                if(gp.obj[gp.currentMap][j] == null) {
+                                    gp.obj[gp.currentMap][j] = droppedItem;
+                                    gp.obj[gp.currentMap][j].worldX = monster.worldX;
+                                    gp.obj[gp.currentMap][j].worldY = monster.worldY;
+                                    break; 
+                                }
+                            }
+                        }
+
+                        // 2. REWARDS
+                        gp.player.exp += monster.exp;
+                        gp.player.checkLevelUp();
+                        gp.ui.showMessage("You killed " + monster.name + "! +" + monster.exp + " EXP"); 
+
+                        gp.monsters[gp.currentMap][monsterIndex] = null;
+                        gp.stopMusic();
+                        gp.gameState = gp.playState; // END BATTLE
+                        gp.playMusic(0);
+                        
+                        // Reset phase for next battle
+                        gp.battlePhase = gp.PHASE_SELECT;
+                    }
+                    // B. MONSTER ALIVE -> ENEMY ATTACKS
+                    else {
+                        int damage = monster.atk - gp.player.def;
+                        if(damage < 0) damage = 0;
+                        gp.player.life -= damage;
+                        gp.player.damageFlash = true;
+                        
+                        gp.ui.currentDialogue = monster.name + " attacks back!\n" + 
+                                                "You took " + damage + " damage.";
+                        
+                        gp.battlePhase = gp.PHASE_ENEMY_ATTACK; 
+                    }
+                }
+            }
+
+            // --- PHASE 2: READING ENEMY ATTACK RESULT ---
+            else if(gp.battlePhase == gp.PHASE_ENEMY_ATTACK) {
+                
+                if(code == KeyEvent.VK_ENTER) {
+                    // A. CHECK IF PLAYER DIED
+                    if(gp.player.life <= 0) {
+                        gp.gameState = gp.gameOverState;
+                        gp.stopMusic();
+                    } 
+                    // B. PLAYER ALIVE -> RETURN TO MENU
+                    else {
+                        gp.battlePhase = gp.PHASE_SELECT; 
+                        gp.ui.commandNum = 0; 
+                    }
+                }
+            }
+        } // <--- THIS BRACKET CLOSES BATTLE STATE
+
+        // 4. TRADE STATE
         else if(gp.gameState == gp.tradeState) {
             if(code == KeyEvent.VK_E) ePressed = true;
     
             if(code == KeyEvent.VK_ENTER) {
                 tradeItem();
             }
-            
-            // CLOSE CHEST
             if(code == KeyEvent.VK_E || code == KeyEvent.VK_ESCAPE) {
                 gp.gameState = gp.playState;
             }
-            
             // NAVIGATION
             if(code == KeyEvent.VK_W) {
-                if(gp.ui.slotRow != 0) {
-                    gp.ui.slotRow--;
-                    gp.playSE(2); // Cursor sound
-                }
+                if(gp.ui.slotRow != 0) { gp.ui.slotRow--; gp.playSE(2); }
             }
             if(code == KeyEvent.VK_A) {
-                if(gp.ui.slotCol != 0) {
-                    gp.ui.slotCol--;
-                    gp.playSE(2);
-                }
+                if(gp.ui.slotCol != 0) { gp.ui.slotCol--; gp.playSE(2); }
             }
             if(code == KeyEvent.VK_S) {
-                // Allow going down to row 3 (Player's last row)
-                if(gp.ui.slotRow != 2) {
-                    gp.ui.slotRow++;
-                    gp.playSE(2);
-                }
+                if(gp.ui.slotRow != 2) { gp.ui.slotRow++; gp.playSE(2); }
             }
             if(code == KeyEvent.VK_D) {
-                if(gp.ui.slotCol != 8) {
-                    gp.ui.slotCol++;
-                    gp.playSE(2);
-                }
+                if(gp.ui.slotCol != 8) { gp.ui.slotCol++; gp.playSE(2); }
             }
+        }
+
+        // 5. GAME OVER STATE
+        else if(gp.gameState == gp.gameOverState) {
+            gameOverStateInput(code);
         }
     }
 
     public void characterStateInput(int code) {
-        // 1. Close Inventory
         if (code == KeyEvent.VK_C || code == KeyEvent.VK_ESCAPE) {
             gp.gameState = gp.playState;
         }
-
-        // 2. Move Cursor (updates UI slot variables)
         if (code == KeyEvent.VK_W) { if(gp.ui.slotRow != 0) gp.ui.slotRow--; }
         if (code == KeyEvent.VK_A) { if(gp.ui.slotCol != 0) gp.ui.slotCol--; }
         if (code == KeyEvent.VK_S) { if(gp.ui.slotRow != 3) gp.ui.slotRow++; }
         if (code == KeyEvent.VK_D) { if(gp.ui.slotCol != 4) gp.ui.slotCol++; }
 
-        // 3. Select Item (Craft or Consume)
         if (code == KeyEvent.VK_ENTER) {
             gp.player.selectItem();
         }
@@ -268,36 +267,20 @@ public class KeyHandler implements KeyListener{
 
     @Override
     public void keyReleased(KeyEvent e) {
-        
         int code = e.getKeyCode();
-
-        if(code == KeyEvent.VK_W) {
-            upPressed = false;
-        }
-        if(code == KeyEvent.VK_S) {
-            downPressed = false;
-        }
-        if(code == KeyEvent.VK_A) {
-            leftPressed = false;
-        }
-        if(code == KeyEvent.VK_D) {
-            rightPressed = false;
-        }
-        
+        if(code == KeyEvent.VK_W) upPressed = false;
+        if(code == KeyEvent.VK_S) downPressed = false;
+        if(code == KeyEvent.VK_A) leftPressed = false;
+        if(code == KeyEvent.VK_D) rightPressed = false;
         if(code == KeyEvent.VK_ENTER) enterPressed = false;
         if(code == KeyEvent.VK_E) ePressed = false;
     }
 
     public void tradeItem() {
-    
         // 1. CHEST (Row 0)
         if(gp.ui.slotRow == 0) {
-            
-            // Ensure valid index for chest inventory
             if(gp.ui.slotCol < gp.ui.npc.inventory.size()) {
-                
                 Entity item = gp.ui.npc.inventory.get(gp.ui.slotCol);
-                
                 if(gp.player.inventory.size() < gp.player.maxInventorySize) {
                     gp.player.inventory.add(item);
                     gp.ui.npc.inventory.remove(gp.ui.slotCol);
@@ -307,20 +290,37 @@ public class KeyHandler implements KeyListener{
                 }
             }
         }
-        
         // 2. PLAYER (Row 1 or 2)
         else {
-            // Calculate player index based on rows 1 and 2
-            // If row is 1, index is 0-8. If row is 2, index is 9-17.
             int playerIndex = (gp.ui.slotRow - 1) * 9 + gp.ui.slotCol;
-            
             if(playerIndex < gp.player.inventory.size()) {
-                
                 Entity item = gp.player.inventory.get(playerIndex);
-                
                 gp.ui.npc.inventory.add(item);
                 gp.player.inventory.remove(playerIndex);
                 gp.playSE(1);
+            }
+        }
+    }
+
+    public void gameOverStateInput(int code) {
+        if(code == KeyEvent.VK_W) {
+            gp.ui.commandNum--;
+            if(gp.ui.commandNum < 0) gp.ui.commandNum = 1;
+            gp.playSE(3); 
+        }
+        if(code == KeyEvent.VK_S) {
+            gp.ui.commandNum++;
+            if(gp.ui.commandNum > 1) gp.ui.commandNum = 0;
+            gp.playSE(3);
+        }
+        if(code == KeyEvent.VK_ENTER) {
+            if(gp.ui.commandNum == 0) { // RETRY
+                gp.gameState = gp.playState;
+                gp.retry();
+                gp.playMusic(0);
+            }
+            else if(gp.ui.commandNum == 1) { // QUIT
+                System.exit(0); 
             }
         }
     }

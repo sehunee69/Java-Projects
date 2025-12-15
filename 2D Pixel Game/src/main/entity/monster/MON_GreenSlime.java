@@ -23,7 +23,7 @@
         level = 1;
         atk = 2;  // Deals 1 heart damage (if player def is 0)
         def = 0; 
-        exp = 2; 
+        exp = 8; 
 
         // HITBOX
         solidArea.x = 3;

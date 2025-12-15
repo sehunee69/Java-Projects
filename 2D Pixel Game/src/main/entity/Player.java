@@ -6,6 +6,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+import java.awt.AlphaComposite;
+import java.awt.Color;
 
 import main.GamePanel;
 import main.KeyHandler;
@@ -18,6 +20,9 @@ public class Player extends Entity{
     public final int screenX;
     public final int screenY;
     public Entity currentLight;
+
+    public boolean damageFlash = false;
+    public int damageFlashCounter = 0;
 
     public Player(GamePanel gp, KeyHandler keyH) {
         super(gp); // Calls Entity constructor
@@ -142,6 +147,14 @@ public class Player extends Entity{
         int monsterIndex = gp.cChecker.checkEntity(this, gp.monsters[gp.currentMap]);
         interactMonster(monsterIndex);
 
+        if(invincible == true) {
+            invincibleCounter++;
+            if(invincibleCounter > 60) { // 1 second of invincibility
+                invincible = false;
+                invincibleCounter = 0;
+            }
+        }
+
         // 3. MOVE PLAYER (Only if moving key is held AND no collision)
         if(moving == true && collisionOn == false) {
 
@@ -175,6 +188,7 @@ public class Player extends Entity{
                 gp.gameState = gp.tradeState;
                 gp.ui.npc = gp.obj[gp.currentMap][i]; 
                 gp.playSE(2); 
+
             }
         }
         // NORMAL PICKUP LOGIC
@@ -285,6 +299,10 @@ public class Player extends Entity{
     public void interactMonster(int i) {
         if(i != 999) {
 
+            if(gp.gameState != gp.playState) {
+                return;
+            }
+
             gp.playSE(4);
 
             gp.stopMusic();
@@ -293,7 +311,6 @@ public class Player extends Entity{
             gp.transitionCounter = 0;
 
             gp.currentBattleMonsterIndex = i;
-            gp.player.direction = "up";
 
             if(this.speed >= gp.monsters[gp.currentMap][i].speed) {
                 gp.battlePhase = 0; // Player goes first
@@ -412,5 +429,19 @@ public class Player extends Entity{
     }
 
         g2.drawImage(image, x, y, gp.tileSize, gp.tileSize, null);
+
+        if(damageFlash == true) {
+            g2.setColor(new Color(255, 0, 0, 150)); // Red with Transparency (150/255)
+            g2.fillRoundRect(x, y, gp.tileSize, gp.tileSize, 10, 10); // Draw red box over player
+            
+            // Logic to stop flashing after a short time
+            damageFlashCounter++;
+            if(damageFlashCounter > 20) { // Flash lasts 20 frames (0.3 seconds)
+                damageFlashCounter = 0;
+                damageFlash = false;
+            }
+        }
+
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
     }
 }

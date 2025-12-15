@@ -17,10 +17,10 @@ public class MON_Soldier extends Entity {
         maxLife = 13;
         life = maxLife;
 
-        level = 6;
-        atk = 10;  // Stronger than slime (which was 2)
+        level = 3;
+        atk = 6;  // Stronger than slime (which was 2)
         def = 2;  // Harder to hit
-        exp = 15; // Gives more XP
+        exp = 20; // Gives more XP
         
         // Hitbox settings
         solidArea.x = 3;

@@ -23,59 +23,77 @@ public class CollisionChecker {
         int entityTopRow = entityTopWorldY/gp.tileSize;
         int entityBottomRow = entityBottomWorldY/gp.tileSize;
 
-        if(entityLeftCol < 0 || entityRightCol >= gp.maxWorldCol || 
-           entityTopRow < 0 || entityBottomRow >= gp.maxWorldRow) {
-            
-            entity.collisionOn = true; // Treat edge of map as solid wall
-            return; 
-        }
-
         int tileNum1, tileNum2;
 
         switch(entity.direction) {
-            case "up":
-                entityTopRow = (entityTopWorldY - entity.speed)/gp.tileSize;
-                tileNum1 = gp.tileM.mapTileNum[gp.currentMap][entityLeftCol][entityTopRow];
-                tileNum2 = gp.tileM.mapTileNum[gp.currentMap][entityRightCol][entityTopRow];
-
-                if(gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true) {
-
-                    entity.collisionOn = true;
-                }
-                break;
-            case "down":
-                entityBottomRow = (entityBottomWorldY + entity.speed)/gp.tileSize;
-                tileNum1 = gp.tileM.mapTileNum[gp.currentMap][entityLeftCol][entityBottomRow];
-                tileNum2 = gp.tileM.mapTileNum[gp.currentMap][entityRightCol][entityBottomRow];
-
-                if(gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true) {
-
-                    entity.collisionOn = true;
-                }
-                break;
-            case "left":
-                entityLeftCol = (entityLeftWorldX - entity.speed)/gp.tileSize;
-                tileNum1 = gp.tileM.mapTileNum[gp.currentMap][entityLeftCol][entityTopRow];
-                tileNum2 = gp.tileM.mapTileNum[gp.currentMap][entityLeftCol][entityBottomRow];
-
-                if(gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true) {
-
-                    entity.collisionOn = true;
-                }
-                break;
-            case "right":
-                entityRightCol = (entityRightWorldX + entity.speed)/gp.tileSize;
-                tileNum1 = gp.tileM.mapTileNum[gp.currentMap][entityRightCol][entityTopRow];
-                tileNum2 = gp.tileM.mapTileNum[gp.currentMap][entityRightCol][entityBottomRow];
-
-                if(gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true) {
-
-                    entity.collisionOn = true;
-                }
-                break;
+        case "up":
+            entityTopRow = (entityTopWorldY - entity.speed)/gp.tileSize;
             
-        }
+            // 1. CHECK IF FUTURE ROW IS OUT OF BOUNDS
+            if(entityTopRow < 0) {
+                entity.collisionOn = true;
+                return;
+            }
+            
+            tileNum1 = gp.tileM.mapTileNum[gp.currentMap][entityLeftCol][entityTopRow];
+            tileNum2 = gp.tileM.mapTileNum[gp.currentMap][entityRightCol][entityTopRow];
 
+            if(gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true) {
+                entity.collisionOn = true;
+            }
+            break;
+            
+        case "down":
+            entityBottomRow = (entityBottomWorldY + entity.speed)/gp.tileSize;
+            
+            // 2. CHECK IF FUTURE ROW IS OUT OF BOUNDS
+            if(entityBottomRow >= gp.maxWorldRow) {
+                entity.collisionOn = true;
+                return;
+            }
+
+            tileNum1 = gp.tileM.mapTileNum[gp.currentMap][entityLeftCol][entityBottomRow];
+            tileNum2 = gp.tileM.mapTileNum[gp.currentMap][entityRightCol][entityBottomRow];
+
+            if(gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true) {
+                entity.collisionOn = true;
+            }
+            break;
+            
+        case "left":
+            entityLeftCol = (entityLeftWorldX - entity.speed)/gp.tileSize;
+            
+            // 3. CHECK IF FUTURE COL IS OUT OF BOUNDS
+            if(entityLeftCol < 0) {
+                entity.collisionOn = true;
+                return;
+            }
+
+            tileNum1 = gp.tileM.mapTileNum[gp.currentMap][entityLeftCol][entityTopRow];
+            tileNum2 = gp.tileM.mapTileNum[gp.currentMap][entityLeftCol][entityBottomRow];
+
+            if(gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true) {
+                entity.collisionOn = true;
+            }
+            break;
+            
+        case "right":
+            entityRightCol = (entityRightWorldX + entity.speed)/gp.tileSize;
+            
+            // 4. CHECK IF FUTURE COL IS OUT OF BOUNDS
+            if(entityRightCol >= gp.maxWorldCol) {
+                entity.collisionOn = true;
+                return;
+            }
+
+            tileNum1 = gp.tileM.mapTileNum[gp.currentMap][entityRightCol][entityTopRow];
+            tileNum2 = gp.tileM.mapTileNum[gp.currentMap][entityRightCol][entityBottomRow];
+
+            if(gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true) {
+                entity.collisionOn = true;
+            }
+            break;
+        }
     }
 
     // CHECK NPC OR MONSTER COLLISION

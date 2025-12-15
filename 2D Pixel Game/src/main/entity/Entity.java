@@ -34,6 +34,8 @@ public class Entity {
     public int shakeCounter = 0;
     public boolean invincible = false;
     public int invincibleCounter = 0;
+    public boolean dying = false;
+    public boolean alive = true;
 
     // CHARACTER STATUS
     public String name;

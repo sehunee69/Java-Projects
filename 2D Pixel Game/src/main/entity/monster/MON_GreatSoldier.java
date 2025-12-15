@@ -15,15 +15,16 @@ public class MON_GreatSoldier extends Entity {
         this.gp = gp;
 
         type = type_monster;
-        name = "Skeleton";
+        name = "Great Soldier";
         speed = 2; // Faster than slime (1) but slower than player (3-4)
-        maxLife = 10;
+        maxLife = 16;
         life = maxLife;
         
         // --- STATS ---
-        atk = 6;  
-        def = 1;  
-        exp = 5;  
+        level = 7;
+        atk = 11;  
+        def = 6;  
+        exp = 25;  
         // -------------
 
         // HITBOX (Adjust values if your sprite is smaller/larger)

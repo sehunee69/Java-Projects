@@ -41,6 +41,7 @@ public class GamePanel extends JPanel implements Runnable{
     public final int transitionState = 4;
     public final int dialogueState = 5;
     public final int tradeState = 6;
+    public final int gameOverState = 7;
 
     // REMEMBER! CHEST IS AN ENTITY!
     public Entity currentChest;
@@ -49,6 +50,9 @@ public class GamePanel extends JPanel implements Runnable{
     public int currentBattleMonsterIndex;
     public int battlePhase; // 0 = Player Turn, 1 = Enemy Turn
     int battleTurnCounter = 0; // Timer for enemy attack delay
+    public final int PHASE_SELECT = 0;        // Player selects Attack/Run
+    public final int PHASE_PLAYER_ATTACK = 1; // Reading Player's attack text
+    public final int PHASE_ENEMY_ATTACK = 2;  // Reading Enemy's attack text
     public int transitionCounter = 0;
 
     // SOUNDS
@@ -165,32 +169,7 @@ public class GamePanel extends JPanel implements Runnable{
 
         if(gameState == battleState) {
             // ENEMY TURN LOGIC
-            if(battlePhase == 1) {
-                battleTurnCounter++;
-                
-                // Wait 60 frames (1 second) then monster attacks
-                if(battleTurnCounter > 60) {
-                    
-                    Entity monster = monsters[currentMap][currentBattleMonsterIndex];
-                    
-                    // Simple Damage Calculation
-                    int damage = monster.atk - player.def;
-                    if(damage < 0) damage = 0;
-                    
-                    player.life -= damage;
-                    ui.showMessage(monster.name + " attacks! You took " + damage + " dmg!");
-                    
-                    // Reset to Player Turn
-                    battlePhase = 0; 
-                    battleTurnCounter = 0;
-                    
-                    // Check Game Over (Optional)
-                    if(player.life <= 0) {
-                        // gameState = gameOverState; (Future implementation)
-                        ui.showMessage("You died...");
-                    }
-                }
-            }
+            player.update();
         }
     }
     
@@ -238,5 +217,27 @@ public class GamePanel extends JPanel implements Runnable{
 
     public void playSE(int i) {
         se.play(i); // Simplified: Just play index i
+    }
+
+    public void retry() {
+        //player.setDefaultValues(); // Restores HP, speed, direction
+        player.invincible = false;
+        
+        // Restore Player Position (Optional: Set to a specific checkpoint)
+        player.worldX = tileSize * 23; 
+        player.worldY = tileSize * 21;
+        
+        // Reset Music
+        stopMusic();
+        playMusic(0); // Play background music
+    }
+
+    public void restart() {
+        // Use this if you want to completely reset the game (reload maps, etc)
+        player.setDefaultValues();
+        player.inventory.clear(); // Clear bag
+        aSetter.setObject(); // Reset items on map
+        aSetter.setMonster(); // Reset monsters
+        playMusic(0);
     }
 }

@@ -6,6 +6,7 @@ import entity.npc.NPC_OldMan;
 import entity.npc.NPC_Standing;
 import obj.OBJ_Chest;
 import obj.OBJ_HealingPotion;
+import obj.OBJ_Shield_Metal;
 import obj.OBJ_Shield_Wood;
 import obj.OBJ_Water;
 
@@ -103,28 +104,40 @@ public class AssetSetter {
     public void setObject() {
 
         int i = 0;
+        int map = 0;
 
-        gp.obj[gp.currentMap][i] = new obj.OBJ_Leaf(gp);
-        gp.obj[gp.currentMap][i].worldX = gp.tileSize * 25;
+        gp.obj[map][i] = new obj.OBJ_Leaf(gp);
+        gp.obj[map][i].worldX = gp.tileSize * 25;
         gp.obj[gp.currentMap][i].worldY = gp.tileSize * 25;
         i++;
-        gp.obj[gp.currentMap][i] = new obj.OBJ_Leaf(gp);
-        gp.obj[gp.currentMap][i].worldX = gp.tileSize * 28;
-        gp.obj[gp.currentMap][i].worldY = gp.tileSize * 28;
+        gp.obj[map][i] = new obj.OBJ_Leaf(gp);
+        gp.obj[map][i].worldX = gp.tileSize * 28;
+        gp.obj[map][i].worldY = gp.tileSize * 28;
         i++;
-        gp.obj[gp.currentMap][i] = new OBJ_Water(gp);
-        gp.obj[gp.currentMap][i].worldX = gp.tileSize * 26; 
-        gp.obj[gp.currentMap][i].worldY = gp.tileSize * 26;
+        gp.obj[map][i] = new OBJ_Water(gp);
+        gp.obj[map][i].worldX = gp.tileSize * 26; 
+        gp.obj[map][i].worldY = gp.tileSize * 26;
         i++;
-        gp.obj[gp.currentMap][i] = new obj.OBJ_Chest(gp);
-        gp.obj[gp.currentMap][i].worldX = gp.tileSize * 46;
-        gp.obj[gp.currentMap][i].worldY = gp.tileSize * 23;
+        gp.obj[map][i] = new obj.OBJ_Chest(gp);
+        gp.obj[map][i].worldX = gp.tileSize * 46;
+        gp.obj[map][i].worldY = gp.tileSize * 23;
         // ADD THE SHIELD TO THIS SPECIFIC CHEST
-        ((OBJ_Chest)gp.obj[gp.currentMap][i]).setLoot(new OBJ_Shield_Wood(gp));
-        ((OBJ_Chest)gp.obj[gp.currentMap][i]).setLoot(new OBJ_HealingPotion(gp));
-        ((OBJ_Chest)gp.obj[gp.currentMap][i]).setLoot(new OBJ_HealingPotion(gp));
+        ((OBJ_Chest)gp.obj[map][i]).setLoot(new OBJ_Shield_Wood(gp));
+        ((OBJ_Chest)gp.obj[map][i]).setLoot(new OBJ_HealingPotion(gp));
+        ((OBJ_Chest)gp.obj[map][i]).setLoot(new OBJ_HealingPotion(gp));
         i++;
-        
+
+        // WORLD 1
+        i = 0;
+        map = 1;
+        gp.obj[map][i] = new obj.OBJ_Chest(gp);
+        gp.obj[map][i].worldX = gp.tileSize * 22;
+        gp.obj[map][i].worldY = gp.tileSize * 23;
+
+        ((OBJ_Chest)gp.obj[map][i]).setLoot(new OBJ_Shield_Metal(gp));
+        ((OBJ_Chest)gp.obj[map][i]).setLoot(new OBJ_HealingPotion(gp));
+        ((OBJ_Chest)gp.obj[map][i]).setLoot(new OBJ_HealingPotion(gp));
+        i++;
     }
 
     public void setNPC() {
