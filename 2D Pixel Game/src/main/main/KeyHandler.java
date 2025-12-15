@@ -109,67 +109,100 @@ public class KeyHandler implements KeyListener{
         }
         
         // 3. BATTLE STATE
+        // 3. BATTLE STATE
         else if(gp.gameState == gp.battleState) {
-            // ONLY ALLOW INPUT IF IT IS PLAYER'S TURN (Phase 0)
+            
+            // PLAYER TURN ONLY
             if(gp.battlePhase == 0) {
 
-                if(code == KeyEvent.VK_W) { 
-                    gp.ui.commandNum--;
-                    if(gp.ui.commandNum < 0) gp.ui.commandNum = 2;
-                }
-                if(code == KeyEvent.VK_S) { 
-                    gp.ui.commandNum++;
-                    if(gp.ui.commandNum > 2) gp.ui.commandNum = 0;
-                }
-                
-                if(code == KeyEvent.VK_ENTER) {
+                // --- SUBSTATE 0: MAIN BATTLE MENU ---
+                if(gp.ui.battleSubState == 0) {
                     
-                    // ATTACK
-                    if(gp.ui.commandNum == 0) {
-                        
-                        int monsterIndex = gp.currentBattleMonsterIndex;
-                        Entity monster = gp.monsters[gp.currentMap][monsterIndex];
-                        
-                        // PLAYER ATTACKS
-                        gp.playSE(6);
-                        int damage = gp.player.atk - monster.def;
-                        if(damage < 0) damage = 0;
-                        
-                        monster.life -= damage;
-                        gp.ui.showMessage("You hit " + monster.name + " for " + damage + " dmg!");
+                    if(code == KeyEvent.VK_W) { 
+                        gp.ui.commandNum--;
+                        if(gp.ui.commandNum < 0) gp.ui.commandNum = 2;
+                        gp.playSE(3);
+                    }
+                    if(code == KeyEvent.VK_S) { 
+                        gp.ui.commandNum++;
+                        if(gp.ui.commandNum > 2) gp.ui.commandNum = 0;
+                        gp.playSE(3);
+                    }
+                    
+                    if(code == KeyEvent.VK_ENTER) {
+                        // ATTACK
+                        if(gp.ui.commandNum == 0) {
+                            int monsterIndex = gp.currentBattleMonsterIndex;
+                            Entity monster = gp.monsters[gp.currentMap][monsterIndex];
 
-                        // CHECK DEATH
-                        if(monster.life <= 0) {
-                            // Drop Item
-                            for(int j = 0; j < gp.obj[1].length; j++) {
-                                if(gp.obj[gp.currentMap][j] == null) {
-                                    gp.obj[gp.currentMap][j] = new obj.OBJ_SlimeGoop(gp);
-                                    gp.obj[gp.currentMap][j].worldX = monster.worldX;
-                                    gp.obj[gp.currentMap][j].worldY = monster.worldY;
-                                    break; 
+                            monster.shakeCounter = 30; // Shake for 30 frames
+                            gp.ui.showingSlash = true; 
+                            gp.ui.slashCounter = 0;
+                            
+                            gp.playSE(6);
+                            int damage = gp.player.atk - monster.def;
+                            if(damage < 0) damage = 0;
+                            monster.life -= damage;
+                            gp.ui.showMessage("You hit " + monster.name + " for " + damage + " dmg!");
+
+                            // CHECK DEATH (Copy your existing death logic here)
+                            if(monster.life <= 0) {
+                                // 1. DROP ITEMS (Existing code)
+                                for(int j = 0; j < gp.obj[1].length; j++) {
+                                    if(gp.obj[gp.currentMap][j] == null) {
+                                        gp.obj[gp.currentMap][j] = new obj.OBJ_SlimeGoop(gp);
+                                        gp.obj[gp.currentMap][j].worldX = monster.worldX;
+                                        gp.obj[gp.currentMap][j].worldY = monster.worldY;
+                                        break; 
+                                    }
                                 }
+                                // 2. GAIN EXP (NEW!)
+                                gp.player.exp += monster.exp;
+                                gp.ui.showMessage("You killed " + monster.name + "! +" + monster.exp + " EXP");
+                                
+                                // 3. CHECK LEVEL UP (NEW!)
+                                gp.player.checkLevelUp();
+
+                                // 4. DESPAWN & END BATTLE
+                                gp.monsters[gp.currentMap][monsterIndex] = null; // Basic despawn
+                                gp.stopMusic();
+                                gp.gameState = gp.playState;
+                                gp.playMusic(0);
+                            } else {
+                                gp.battlePhase = 1; // Enemy Turn
                             }
-                            // End Battle
-                            gp.monsters[gp.currentMap][monsterIndex] = null; 
+                        }
+                        // BAG
+                        else if(gp.ui.commandNum == 1) { 
+                            gp.ui.battleSubState = 1; // Switch to Bag Mode
+                            gp.playSE(2);
+                        }
+                        // RUN
+                        else if(gp.ui.commandNum == 2) {
+                            gp.ui.commandNum = 0;
                             gp.stopMusic();
-                            gp.gameState = gp.playState; 
+                            gp.gameState = gp.playState;
                             gp.playMusic(0);
-                            gp.ui.showMessage("You won!");
-                        } else {
-                            // IF ALIVE, PASS TURN TO ENEMY
-                            gp.battlePhase = 1;
                         }
                     }
-                    // BAG
-                    if(gp.ui.commandNum == 1) { 
-                        // You can eventually open bag here, for now it does nothing
-                        gp.ui.showMessage("Bag not ready!");
+                }
+                
+                // --- SUBSTATE 1: INVENTORY SELECTION ---
+                else if (gp.ui.battleSubState == 1) {
+                    
+                    // NAVIGATE BAG (Reuse UI slots)
+                    if(code == KeyEvent.VK_W) { if(gp.ui.slotRow != 0) gp.ui.slotRow--; gp.playSE(3);}
+                    if(code == KeyEvent.VK_A) { if(gp.ui.slotCol != 0) gp.ui.slotCol--; gp.playSE(3);}
+                    if(code == KeyEvent.VK_S) { if(gp.ui.slotRow != 3) gp.ui.slotRow++; gp.playSE(3);}
+                    if(code == KeyEvent.VK_D) { if(gp.ui.slotCol != 4) gp.ui.slotCol++; gp.playSE(3);}
+                    
+                    if(code == KeyEvent.VK_ENTER) {
+                        gp.player.selectItem(); // Use the item
                     }
-                    // RUN
-                    if(gp.ui.commandNum == 2) {
-                        gp.stopMusic();
-                        gp.gameState = gp.playState;
-                        gp.playMusic(0);
+                    
+                    // GO BACK TO MENU
+                    if(code == KeyEvent.VK_ESCAPE) {
+                        gp.ui.battleSubState = 0;
                     }
                 }
             }

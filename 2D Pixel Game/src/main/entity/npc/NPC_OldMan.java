@@ -9,6 +9,7 @@ public class NPC_OldMan extends Entity {
     
     // Boundaries for the restricted area
     private int minX, minY, maxX, maxY;
+    boolean gaveSword = false;
 
     public NPC_OldMan(GamePanel gp, int x, int y) {
         super(gp);
@@ -87,6 +88,33 @@ public class NPC_OldMan extends Entity {
             }
 
             actionLockCounter = 0;
+        }
+    }
+
+    @Override
+    public void speak() {
+        
+        // 1. CHECK IF DIALOGUE IS FINISHED
+        if(dialogues[dialogueIndex] == null) {
+            
+            // 2. GIVE SWORD (Only once)
+            if(gaveSword == false) {
+                gp.ui.currentDialogue = "You received a Wooden Sword!";
+                gp.player.inventory.add(new obj.OBJ_Sword_Wood(gp));
+                gaveSword = true;
+                
+                // Force the window to stay open for this message
+                gp.gameState = gp.dialogueState; 
+            }
+            else {
+                // If sword already given, close window normally
+                dialogueIndex = 0;
+                gp.gameState = gp.playState;
+            }
+        } 
+        else {
+            // Normal dialogue behavior
+            super.speak();
         }
     }
 }

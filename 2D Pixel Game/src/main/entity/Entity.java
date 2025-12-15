@@ -31,6 +31,9 @@ public class Entity {
     // AI / COUNTERS
     public int actionLockCounter = 0;
     public int maxSpriteNum = 2;
+    public int shakeCounter = 0;
+    public boolean invincible = false;
+    public int invincibleCounter = 0;
 
     // CHARACTER STATUS
     public String name;
@@ -69,7 +72,7 @@ public class Entity {
     public final int maxInventorySize = 18;
 
     public String dialogues[] = new String[20];
-    int dialogueIndex = 0;
+    public int dialogueIndex = 0;
 
     public Entity(GamePanel gp) {
         this.gp = gp;

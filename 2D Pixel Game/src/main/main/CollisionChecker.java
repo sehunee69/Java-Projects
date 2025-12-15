@@ -23,6 +23,13 @@ public class CollisionChecker {
         int entityTopRow = entityTopWorldY/gp.tileSize;
         int entityBottomRow = entityBottomWorldY/gp.tileSize;
 
+        if(entityLeftCol < 0 || entityRightCol >= gp.maxWorldCol || 
+           entityTopRow < 0 || entityBottomRow >= gp.maxWorldRow) {
+            
+            entity.collisionOn = true; // Treat edge of map as solid wall
+            return; 
+        }
+
         int tileNum1, tileNum2;
 
         switch(entity.direction) {
@@ -66,6 +73,7 @@ public class CollisionChecker {
                     entity.collisionOn = true;
                 }
                 break;
+            
         }
 
     }

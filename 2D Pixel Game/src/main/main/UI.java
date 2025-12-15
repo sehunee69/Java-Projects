@@ -22,6 +22,9 @@ public class UI {
     Font dialogueFont;
 
     BufferedImage battleBackground;
+    BufferedImage slashEffect;
+    public boolean showingSlash = false;
+    int slashCounter = 0;
 
     public Entity npc;
     
@@ -37,6 +40,7 @@ public class UI {
     
     // SUBSTATE: 0 = Menu Select, 1 = Status, 2 = Bag
     public int subState = 0; 
+    public int battleSubState = 0;
 
     // DIALOGUE
     public String currentDialogue = "";
@@ -55,7 +59,19 @@ public class UI {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        try {
+            battleBackground = ImageIO.read(getClass().getResourceAsStream("/battleScenes/grass-battleScene.png"));
+            
+            // OPTIONAL: Load a real slash image if you have one
+            // slashEffect = ImageIO.read(getClass().getResourceAsStream("/res/effects/slash.png"));
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
+    
     
 
     public void showMessage(String text) {
@@ -365,52 +381,167 @@ public class UI {
 
     public void drawBattleScreen() {
         
-        // 1. DRAW BACKGROUND IMAGE (Replaces the black rectangle)
+        // 1. DRAW BACKGROUND
         if (battleBackground != null) {
             g2.drawImage(battleBackground, 0, 0, gp.screenWidth, gp.screenHeight, null);
         } else {
-            // Fallback to black if image is missing
             g2.setColor(new Color(0,0,0));
             g2.fillRect(0,0,gp.screenWidth, gp.screenHeight);
         }
 
+        // 2. DRAW MONSTER IMAGE
         int monsterIndex = gp.currentBattleMonsterIndex;
         if(monsterIndex != 999 && gp.monsters[gp.currentMap][monsterIndex] != null) {
-            int monsterX = gp.screenWidth/2 - (gp.tileSize*2);
-            int monsterY = gp.tileSize; 
-            g2.drawImage(gp.monsters[gp.currentMap][monsterIndex].down1, monsterX, monsterY, gp.tileSize*4, gp.tileSize*4, null);
             
-            g2.setFont(g2.getFont().deriveFont(Font.BOLD, 24F));
+            Entity monster = gp.monsters[gp.currentMap][monsterIndex];
+
+            int offsetX = 0;
+            int offsetY = 0;
+
+            if(monster.shakeCounter > 0) {
+                // Generate random shake between -10 and 10 pixels
+                offsetX = (int)(Math.random() * 20) - 10;
+                offsetY = (int)(Math.random() * 20) - 10;
+                
+                // Reduce the counter so it eventually stops shaking
+                monster.shakeCounter--; 
+            }
+
+            int monsterX = (gp.tileSize * 2) + offsetX; 
+            int monsterY = (gp.tileSize * 1) + offsetY;
+            
+            
+            g2.drawImage(monster.down2, monsterX, monsterY, gp.tileSize*4, gp.tileSize*4, null);
+
+            if(showingSlash == true) {
+                
+                // If you have an image:
+                // g2.drawImage(slashEffect, monsterX, monsterY, gp.tileSize*4, gp.tileSize*4, null);
+                
+                // If you DON'T have an image (Draw a Red Scratch):
+                g2.setColor(Color.RED);
+                g2.setStroke(new BasicStroke(4f));
+                g2.drawLine(monsterX, monsterY, monsterX + 150, monsterY + 150); // Slash 1
+                g2.drawLine(monsterX + 150, monsterY, monsterX, monsterY + 150); // Slash 2 (X shape)
+                
+                // Animation Timer
+                slashCounter++;
+                if(slashCounter > 20) { // Animation lasts 20 frames (0.3 seconds)
+                    slashCounter = 0;
+                    showingSlash = false; // Stop drawing
+                }
+            }
+            
+            // --- ENEMY HUD (Top Right) ---
+            int hudX = gp.screenWidth - (gp.tileSize * 9);
+            int hudY = gp.tileSize;
+            int hudWidth = gp.tileSize * 8;
+            int hudHeight = gp.tileSize * 2;
+            
+            // Background
+            drawSubWindow(hudX, hudY, hudWidth, hudHeight);
+            
+            // Name & Level
             g2.setColor(Color.white);
-            String hpText = "HP: " + gp.monsters[gp.currentMap][monsterIndex].life + "/" + gp.monsters[gp.currentMap][monsterIndex].maxLife;
-            int textLength = (int)g2.getFontMetrics().getStringBounds(hpText, g2).getWidth();
-            g2.drawString(hpText, gp.screenWidth/2 - textLength/2, monsterY - 10);
+            g2.setFont(g2.getFont().deriveFont(Font.BOLD, 24F));
+            g2.drawString(monster.name + " Lv." + monster.level, hudX + 20, hudY + 40);
+            
+            // HP Bar
+            double oneScale = (double)gp.tileSize * 6 / monster.maxLife;
+            double hpBarValue = oneScale * monster.life;
+            
+            // Bar Background
+            g2.setColor(new Color(35, 35, 35));
+            g2.fillRect(hudX + 20, hudY + 50, (gp.tileSize*6), 20);
+            
+            // Actual Health
+            g2.setColor(new Color(255, 0, 30));
+            g2.fillRect(hudX + 20, hudY + 50, (int)hpBarValue, 20);
+            
+            // Bar Border
+            g2.setColor(Color.white);
+            g2.drawRect(hudX + 20, hudY + 50, (gp.tileSize*6), 20);
+            
+            // HP Text
+            g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 18F));
+            g2.drawString("HP: " + monster.life + "/" + monster.maxLife, hudX + 20, hudY + 90);
         }
 
-        int frameX = gp.tileSize * 2; 
-        int frameHeight = gp.tileSize * 4; 
-        int frameY = gp.screenHeight - frameHeight; 
-        int frameWidth = gp.screenWidth - (gp.tileSize * 4); 
-
-        drawSubWindow(frameX, frameY, frameWidth, frameHeight);
-
+        // 3. DRAW PLAYER HUD (Above the Command Window)
+        int pFrameX = gp.tileSize * 2; 
+        int pFrameHeight = gp.tileSize * 4; 
+        int pFrameY = gp.screenHeight - pFrameHeight; 
+        int pFrameWidth = gp.screenWidth - (gp.tileSize * 4); 
+        
+        // Calculate HUD position (Just above the menu)
+        int hudX = pFrameX;
+        int hudY = pFrameY - (gp.tileSize * 2);
+        int hudWidth = gp.tileSize * 7;
+        int hudHeight = gp.tileSize * 2;
+        
+        drawSubWindow(hudX, hudY, hudWidth, hudHeight);
+        
         g2.setColor(Color.white);
-        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 28F));
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 24F));
+        g2.drawString("Player Lv." + gp.player.level, hudX + 20, hudY + 35);
+        
+        // Player HP Bar
+        double scale = (double)(gp.tileSize * 5) / gp.player.maxLife;
+        double hpBar = scale * gp.player.life;
+        
+        g2.setColor(new Color(35,35,35));
+        g2.fillRect(hudX + 20, hudY + 45, gp.tileSize*5, 15);
+        g2.setColor(new Color(255,0,30));
+        g2.fillRect(hudX + 20, hudY + 45, (int)hpBar, 15);
+        g2.setColor(Color.white);
+        g2.drawRect(hudX + 20, hudY + 45, gp.tileSize*5, 15);
+        
+        // Player EXP Bar (Smaller, Blue)
+        double xpScale = (double)(gp.tileSize * 5) / gp.player.nextLevelExp;
+        double xpBar = xpScale * gp.player.exp;
+        
+        g2.setColor(new Color(35,35,35));
+        g2.fillRect(hudX + 20, hudY + 65, gp.tileSize*5, 10);
+        g2.setColor(new Color(0,150,255)); // Blue for XP
+        g2.fillRect(hudX + 20, hudY + 65, (int)xpBar, 10);
+        g2.setColor(Color.white);
+        g2.drawRect(hudX + 20, hudY + 65, gp.tileSize*5, 10);
+        g2.setFont(g2.getFont().deriveFont(12F));
+        g2.drawString("EXP", hudX + 20 + (gp.tileSize*5) + 5, hudY + 75);
 
-        int textX = frameX + 40;
-        int textY = frameY + gp.tileSize; 
-        int lineHeight = 40; 
 
-        g2.drawString("Attack", textX, textY);
-        if(commandNum == 0) g2.drawString(">", textX - 25, textY);
-
-        textY += lineHeight;
-        g2.drawString("Bag", textX, textY);
-        if(commandNum == 1) g2.drawString(">", textX - 25, textY);
-
-        textY += lineHeight;
-        g2.drawString("Run", textX, textY);
-        if(commandNum == 2) g2.drawString(">", textX - 25, textY);
+        // 4. DRAW BATTLE MENU OR INVENTORY
+        if(battleSubState == 0) {
+            // Draw Main Battle Menu
+            drawSubWindow(pFrameX, pFrameY, pFrameWidth, pFrameHeight);
+    
+            g2.setColor(Color.white);
+            g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 28F));
+    
+            int textX = pFrameX + 40;
+            int textY = pFrameY + gp.tileSize; 
+            int lineHeight = 40; 
+    
+            g2.drawString("Attack", textX, textY);
+            if(commandNum == 0) g2.drawString(">", textX - 25, textY);
+    
+            textY += lineHeight;
+            g2.drawString("Bag", textX, textY);
+            if(commandNum == 1) g2.drawString(">", textX - 25, textY);
+    
+            textY += lineHeight;
+            g2.drawString("Run", textX, textY);
+            if(commandNum == 2) g2.drawString(">", textX - 25, textY);
+        } 
+        else if (battleSubState == 1) {
+            // Draw Inventory (Reuse your existing inventory method!)
+            drawInventoryWindow();
+            
+            // Add a hint text
+            g2.setFont(g2.getFont().deriveFont(18F));
+            g2.setColor(Color.white);
+            g2.drawString("[ESC] Back", gp.screenWidth - 150, gp.screenHeight - 20);
+        }
     }
 
     public void drawTransition() {

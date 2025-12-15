@@ -200,32 +200,59 @@ public class Player extends Entity{
         if (itemIndex < inventory.size()) {
             Entity selectedItem = inventory.get(itemIndex);
 
-            // 1. CONSUMABLE
+            // 1. CONSUMABLE (Potions)
             if(selectedItem.type == type_consumable) {
                 if(selectedItem.name.equals("Red Potion")) {
-                     life += 2; 
-                     if(life > maxLife) life = maxLife;
-                     inventory.remove(itemIndex);
-                     gp.ui.showMessage("Drank Potion!");
+                     // Heal Logic
+                     if(life < maxLife) {
+                         life += 2; 
+                         if(life > maxLife) life = maxLife;
+                         inventory.remove(itemIndex);
+                         gp.ui.showMessage("Drank Potion!");
+                         gp.playSE(2);
+                         
+                         // Battle Logic: Using potion ends turn
+                         if(gp.gameState == gp.battleState) {
+                             gp.ui.battleSubState = 0;
+                             gp.battlePhase = 1;
+                             gp.ui.showMessage("Used turn to heal!");
+                         }
+                     } else {
+                         gp.ui.showMessage("Life is full!");
+                     }
                 }
             }
+            
+            // 2. WEAPON
             // 2. WEAPON
             else if(selectedItem.type == type_sword || selectedItem.type == type_axe) {
-                currentWeapon = selectedItem;
-                atk = getAttack();
-                gp.ui.showMessage("Equipped " + selectedItem.name);
+                if(gp.gameState != gp.battleState) {
+                    currentWeapon = selectedItem;
+                    atk = getAttack(); // Recalculates Total Attack (Strength + Sword)
+                    gp.ui.showMessage("Equipped " + selectedItem.name);
+                } else {
+                    gp.ui.showMessage("Can't equip in battle!");
+                }
             }
+            
             // 3. SHIELD
             else if(selectedItem.type == type_shield) {
-                currentShield = selectedItem;
-                def = getDefense();
-                gp.ui.showMessage("Equipped " + selectedItem.name);
+                if(gp.gameState != gp.battleState) {
+                    currentShield = selectedItem;
+                    def = getDefense();
+                    gp.ui.showMessage("Equipped " + selectedItem.name);
+                } else {
+                    gp.ui.showMessage("Can't equip in battle!");
+                }
             }
-            // 4. CRAFTING
+            
+            // 4. CRAFTING (Leaf + Water = Potion)
             else if(selectedItem.type == type_crafting) {
                  if(selectedItem.name.equals("Leaf")) {
                      int waterIndex = searchInventory("Water");
+                     
                      if(waterIndex != -1) {
+                         // Remove items (handle index shifting)
                          if(itemIndex < waterIndex) {
                              inventory.remove(waterIndex); 
                              inventory.remove(itemIndex);
@@ -233,8 +260,11 @@ public class Player extends Entity{
                              inventory.remove(itemIndex);
                              inventory.remove(waterIndex);
                          }
+                         
+                         // Add Potion
                          inventory.add(new obj.OBJ_HealingPotion(gp));
                          gp.ui.showMessage("Crafted Potion!");
+                         gp.playSE(1);
                      } else {
                          gp.ui.showMessage("Need Water!");
                      }
@@ -276,21 +306,57 @@ public class Player extends Entity{
     }
 
     public void interactNPC(int i) {
-    if(i != 999) {
-        // If index is not 999, we are touching an NPC.
-        // If we are touching them, we don't want to walk through.
-        
-        // However, usually checkEntity sets 'collisionOn' to true automatically inside CollisionChecker.
-        // So just by calling checkEntity above, physical collision should work!
-        
-        // This method is mostly for if you want to trigger dialogue by bumping into them
-        // (Optional: bumping triggers dialogue)
-        if(gp.keyH.enterPressed == true) {
-            // gp.gameState = gp.dialogueState;
-            // gp.npc[i].speak();
+        if(i != 999) {
+            // If index is not 999, we are touching an NPC.
+            // If we are touching them, we don't want to walk through.
+            
+            // However, usually checkEntity sets 'collisionOn' to true automatically inside CollisionChecker.
+            // So just by calling checkEntity above, physical collision should work!
+            
+            // This method is mostly for if you want to trigger dialogue by bumping into them
+            // (Optional: bumping triggers dialogue)
+            if(gp.keyH.enterPressed == true) {
+                // gp.gameState = gp.dialogueState;
+                // gp.npc[i].speak();
+            }
         }
     }
-}
+
+    public void checkLevelUp() {
+        
+        if(exp >= nextLevelExp) {
+            
+            // 1. LEVEL UP
+            level++;
+            
+            // 2. CARRY OVER EXTRA EXP
+            // (e.g. if you have 12 exp and needed 10, you keep 2)
+            exp = exp - nextLevelExp; 
+            
+            // 3. INCREASE REQUIREMENT (Curve)
+            // Next level needs 2x EXP (5 -> 10 -> 20 -> 40...)
+            nextLevelExp = nextLevelExp * 2; 
+            
+            // 4. INCREASE STATS
+            maxLife += 2;       // +1 Heart
+            strength++;         // Hit harder
+            dexterity++;        // Take less damage
+            
+            // 5. RECALCULATE ATK/DEF
+            atk = getAttack();
+            def = getDefense();
+            
+            // 6. HEAL & SOUND
+            gp.playSE(1); // Play "Power Up" sound (Ensure you have a sound at index 1 or change this)
+            gp.gameState = gp.dialogueState; // Optional: Pause to show message
+            gp.ui.currentDialogue = "You are level " + level + " now!\n"
+                                  + "You feel stronger!";
+            gp.ui.drawDialogueWindow(); // Force draw text immediately if needed
+            
+            // Heal fully on level up (Classic RPG mechanic)
+            life = maxLife;
+        }
+    }
 
     public void draw(Graphics2D g2) {
 

@@ -14,8 +14,13 @@ public class MON_Soldier extends Entity {
         type = type_monster;
         name = "Soldier";
         speed = 3;
-        maxLife = 10;
+        maxLife = 13;
         life = maxLife;
+
+        level = 6;
+        atk = 10;  // Stronger than slime (which was 2)
+        def = 2;  // Harder to hit
+        exp = 15; // Gives more XP
         
         // Hitbox settings
         solidArea.x = 3;
