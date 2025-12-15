@@ -7,7 +7,7 @@ import entity.Entity;
 public class KeyHandler implements KeyListener{
 
     GamePanel gp;
-    public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed;
+    public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed, ePressed;
 
     public KeyHandler(GamePanel gp) {
         this.gp = gp;
@@ -30,6 +30,7 @@ public class KeyHandler implements KeyListener{
             if(code == KeyEvent.VK_D) rightPressed = true;
             if(code == KeyEvent.VK_C) gp.gameState = gp.characterState;
             if(code == KeyEvent.VK_ENTER) enterPressed = true;
+            if(code == KeyEvent.VK_E) ePressed = true;
             if(code == KeyEvent.VK_ENTER) { /* Interact logic */ }
 
             if(code == KeyEvent.VK_E) {
@@ -63,10 +64,22 @@ public class KeyHandler implements KeyListener{
                     if(gp.ui.commandNum > 3) gp.ui.commandNum = 0;
                 }
                 if(code == KeyEvent.VK_ENTER) {
-                    if(gp.ui.commandNum == 0) gp.ui.subState = 1; // Status
-                    if(gp.ui.commandNum == 1) gp.ui.subState = 2; // Bag
-                    if(gp.ui.commandNum == 2) gp.ui.subState = 0; // Options
-                    if(gp.ui.commandNum == 3) gp.ui.subState = 0; // Save
+                    if(gp.ui.commandNum == 0) {
+                        gp.ui.subState = 1; // Status
+                        gp.playSE(3);
+                    }
+                    if(gp.ui.commandNum == 1) {
+                        gp.ui.subState = 2; // Bag
+                        gp.playSE(2);
+                    }
+                    if(gp.ui.commandNum == 2) {
+                        gp.ui.subState = 0; // Options
+                        gp.playSE(3);
+                    }
+                    if(gp.ui.commandNum == 3) {
+                        gp.ui.subState = 0; // Save
+                        gp.playSE(3);
+                    }
                 }
             }
             // B. INSIDE STATUS (Right Side)
@@ -118,6 +131,7 @@ public class KeyHandler implements KeyListener{
                         Entity monster = gp.monsters[monsterIndex];
                         
                         // PLAYER ATTACKS
+                        gp.playSE(6);
                         int damage = gp.player.atk - monster.def;
                         if(damage < 0) damage = 0;
                         
@@ -137,7 +151,9 @@ public class KeyHandler implements KeyListener{
                             }
                             // End Battle
                             gp.monsters[monsterIndex] = null; 
+                            gp.stopMusic();
                             gp.gameState = gp.playState; 
+                            gp.playMusic(0);
                             gp.ui.showMessage("You won!");
                         } else {
                             // IF ALIVE, PASS TURN TO ENEMY
@@ -151,8 +167,49 @@ public class KeyHandler implements KeyListener{
                     }
                     // RUN
                     if(gp.ui.commandNum == 2) {
+                        gp.stopMusic();
                         gp.gameState = gp.playState;
+                        gp.playMusic(0);
                     }
+                }
+            }
+        }
+        else if(gp.gameState == gp.tradeState) {
+            if(code == KeyEvent.VK_E) ePressed = true;
+    
+            if(code == KeyEvent.VK_ENTER) {
+                tradeItem();
+            }
+            
+            // CLOSE CHEST
+            if(code == KeyEvent.VK_E || code == KeyEvent.VK_ESCAPE) {
+                gp.gameState = gp.playState;
+            }
+            
+            // NAVIGATION
+            if(code == KeyEvent.VK_W) {
+                if(gp.ui.slotRow != 0) {
+                    gp.ui.slotRow--;
+                    gp.playSE(2); // Cursor sound
+                }
+            }
+            if(code == KeyEvent.VK_A) {
+                if(gp.ui.slotCol != 0) {
+                    gp.ui.slotCol--;
+                    gp.playSE(2);
+                }
+            }
+            if(code == KeyEvent.VK_S) {
+                // Allow going down to row 3 (Player's last row)
+                if(gp.ui.slotRow != 2) {
+                    gp.ui.slotRow++;
+                    gp.playSE(2);
+                }
+            }
+            if(code == KeyEvent.VK_D) {
+                if(gp.ui.slotCol != 8) {
+                    gp.ui.slotCol++;
+                    gp.playSE(2);
                 }
             }
         }
@@ -195,6 +252,43 @@ public class KeyHandler implements KeyListener{
         }
         
         if(code == KeyEvent.VK_ENTER) enterPressed = false;
+        if(code == KeyEvent.VK_E) ePressed = false;
     }
 
+    public void tradeItem() {
+    
+        // 1. CHEST (Row 0)
+        if(gp.ui.slotRow == 0) {
+            
+            // Ensure valid index for chest inventory
+            if(gp.ui.slotCol < gp.ui.npc.inventory.size()) {
+                
+                Entity item = gp.ui.npc.inventory.get(gp.ui.slotCol);
+                
+                if(gp.player.inventory.size() < gp.player.maxInventorySize) {
+                    gp.player.inventory.add(item);
+                    gp.ui.npc.inventory.remove(gp.ui.slotCol);
+                    gp.playSE(1); 
+                } else {
+                    gp.ui.showMessage("Bag is full!");
+                }
+            }
+        }
+        
+        // 2. PLAYER (Row 1 or 2)
+        else {
+            // Calculate player index based on rows 1 and 2
+            // If row is 1, index is 0-8. If row is 2, index is 9-17.
+            int playerIndex = (gp.ui.slotRow - 1) * 9 + gp.ui.slotCol;
+            
+            if(playerIndex < gp.player.inventory.size()) {
+                
+                Entity item = gp.player.inventory.get(playerIndex);
+                
+                gp.ui.npc.inventory.add(item);
+                gp.player.inventory.remove(playerIndex);
+                gp.playSE(1);
+            }
+        }
+    }
 }

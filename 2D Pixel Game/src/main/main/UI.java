@@ -14,8 +14,16 @@ public class UI {
     GamePanel gp;
     Graphics2D g2;
     Font arial_40;
+    Font arial_80;
+
+    Color windowColor;
+    Color borderColor;
+    BasicStroke borderStroke;
+    Font dialogueFont;
 
     BufferedImage battleBackground;
+
+    public Entity npc;
     
     // VARIABLES
     public boolean messageOn = false;
@@ -36,6 +44,11 @@ public class UI {
     public UI(GamePanel gp) {
         this.gp = gp;
         arial_40 = new Font("Arial", Font.PLAIN, 40);
+
+        dialogueFont = new Font("Arial", Font.PLAIN, 28);
+        windowColor = new Color(0, 0, 0, 210); // Transparent Black
+        borderColor = new Color(255, 255, 255); // White
+        borderStroke = new BasicStroke(5);
 
         try {
             battleBackground = ImageIO.read(getClass().getResourceAsStream("/battleScenes/grass-battleScene.png"));
@@ -86,6 +99,10 @@ public class UI {
 
         if(gp.gameState == gp.dialogueState) {
             drawDialogueWindow();
+        }
+
+        if(gp.gameState == gp.tradeState) {
+            drawTradeScreen();
         }
     }
 
@@ -315,15 +332,13 @@ public class UI {
 
     public void drawSubWindow(int x, int y, int width, int height) {
         // Black Background
-        Color c = new Color(0,0,0, 220);
-        g2.setColor(c);
+        g2.setColor(windowColor);
         g2.fillRoundRect(x, y, width, height, 35, 35);
         
         // White Border
-        c = new Color(255,255,255);
-        g2.setColor(c);
-        g2.setStroke(new BasicStroke(5));
-        g2.drawRoundRect(x+5, y+5, width-10, height-10, 25, 25);
+        g2.setColor(borderColor);
+        g2.setStroke(borderStroke);
+        g2.drawRoundRect(x + 5, y + 5, width - 10, height - 10, 25, 25);
     }
     
     public void drawPlayerLife() {
@@ -438,14 +453,146 @@ public class UI {
 
         drawSubWindow(x, y, width, height);
 
-        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 28F));
+        //g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 28F));
+        g2.setFont(dialogueFont); 
+        g2.setColor(Color.white);
+
         x += gp.tileSize;
         y += gp.tileSize;
 
         // Split text by \n so it doesn't run off screen
-        for(String line : currentDialogue.split("\n")) {
-            g2.drawString(line, x, y);
-            y += 40;
+        if(currentDialogue != null) {
+            for(String line : currentDialogue.split("\n")) {
+                g2.drawString(line, x, y);
+                y += 40;
+            }
+        }
+    }
+
+    public void drawTradeScreen() {
+    
+        // 1. DRAW CHEST INVENTORY (Top Half - 9x1 Grid)
+        int frameX = gp.tileSize * 2;
+        int frameY = gp.tileSize;
+        int frameWidth = gp.tileSize * 11;
+        int frameHeight = gp.tileSize * 2 + 20; // Reduced height for 1 row
+        
+        drawSubWindow(frameX, frameY, frameWidth, frameHeight);
+        
+        // TEXT
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 28F));
+        g2.setColor(Color.white);
+        g2.drawString("CHEST", frameX + 40, frameY + 40);
+
+        // DRAW CHEST ITEMS
+        int slotXstart = frameX + 20;
+        int slotYstart = frameY + 60;
+        int slotX = slotXstart;
+        int slotY = slotYstart;
+        
+        // LOOP 9 TIMES (Fixed size for 9x1 grid)
+        for(int i = 0; i < 9; i++) {
+            
+            // A. DRAW EMPTY SLOT OUTLINE (The White Box)
+            g2.setColor(new Color(255, 255, 255, 120)); 
+            g2.setStroke(new BasicStroke(1)); 
+            g2.drawRoundRect(slotX, slotY, gp.tileSize, gp.tileSize, 10, 10);
+
+            // B. DRAW CURSOR (If we are on Row 0)
+            if(gp.ui.slotRow == 0 && i == gp.ui.slotCol) {
+                g2.setColor(new Color(240,190,90));
+                g2.setStroke(new BasicStroke(3));
+                g2.drawRoundRect(slotX, slotY, gp.tileSize, gp.tileSize, 10, 10);
+            }
+            
+            // C. DRAW ITEM (If it exists)
+            if(i < npc.inventory.size()) {
+                if(npc.inventory.get(i) != null) {
+                    g2.drawImage(npc.inventory.get(i).down1, slotX, slotY, gp.tileSize, gp.tileSize, null);
+                }
+            }
+            
+            slotX += gp.tileSize + 3; // Move to next column
+        }
+
+        // 2. DRAW PLAYER INVENTORY (Bottom Half)
+        int pFrameY = frameY + frameHeight + 20; // Position below chest
+        int pFrameHeight = gp.tileSize * 4;      // Standard height for 9x2
+        
+        drawSubWindow(frameX, pFrameY, frameWidth, pFrameHeight);
+        
+        g2.setColor(Color.white);
+        g2.drawString("YOUR BAG", frameX + 40, pFrameY + 40);
+        
+        int pSlotXstart = frameX + 20;
+        int pSlotYstart = pFrameY + 60;
+        slotX = pSlotXstart;
+        slotY = pSlotYstart;
+        
+        // LOOP 18 TIMES (Fixed size for player 9x2 grid)
+        for(int i = 0; i < 18; i++) {
+            
+            // A. DRAW EMPTY SLOT OUTLINE
+            g2.setColor(new Color(255, 255, 255, 120)); 
+            g2.setStroke(new BasicStroke(1)); 
+            g2.drawRoundRect(slotX, slotY, gp.tileSize, gp.tileSize, 10, 10);
+
+            // B. DRAW CURSOR
+            // Player rows are now Row 1 and Row 2.
+            // We calculate the current index: (slotRow - 1) * 9 + slotCol
+            if(gp.ui.slotRow > 0) {
+                int playerIndex = (gp.ui.slotRow - 1) * 9 + gp.ui.slotCol;
+                if(i == playerIndex) {
+                    g2.setColor(new Color(240,190,90));
+                    g2.setStroke(new BasicStroke(3));
+                    g2.drawRoundRect(slotX, slotY, gp.tileSize, gp.tileSize, 10, 10);
+                }
+            }
+
+            // C. DRAW ITEM
+            if(i < gp.player.inventory.size()) {
+                if(gp.player.inventory.get(i) != null) {
+                    g2.drawImage(gp.player.inventory.get(i).down1, slotX, slotY, gp.tileSize, gp.tileSize, null);
+                }
+            }
+            
+            slotX += gp.tileSize + 3;
+            
+            if(i == 8) { // Move to next row after 9 items
+                slotX = pSlotXstart;
+                slotY += gp.tileSize + 3;
+            }
+        }
+        
+        // 3. DRAW DESCRIPTION WINDOW
+        // Logic updated for new row numbers
+        Entity selectedItem = null;
+        
+        if(gp.ui.slotRow == 0) { // CHEST
+            if(gp.ui.slotCol < npc.inventory.size()) {
+                selectedItem = npc.inventory.get(gp.ui.slotCol);
+            }
+        } else { // PLAYER (Row 1 or 2)
+            int playerIndex = (gp.ui.slotRow - 1) * 9 + gp.ui.slotCol;
+            if(playerIndex < gp.player.inventory.size()) {
+                selectedItem = gp.player.inventory.get(playerIndex);
+            }
+        }
+        
+        if(selectedItem != null) {
+            int dFrameY = pFrameY + pFrameHeight + 20;
+            int dFrameHeight = gp.tileSize * 3;
+            
+            drawSubWindow(frameX, dFrameY, frameWidth, dFrameHeight);
+            
+            int textX = frameX + 20;
+            int textY = dFrameY + 40;
+            g2.setColor(Color.white);
+            g2.setFont(g2.getFont().deriveFont(20F));
+            
+            g2.drawString(selectedItem.name, textX, textY);
+            textY += 32;
+            g2.drawString(selectedItem.description, textX, textY);
         }
     }
 }

@@ -38,6 +38,10 @@ public class GamePanel extends JPanel implements Runnable{
     public final int characterState = 3;
     public final int transitionState = 4;
     public final int dialogueState = 5;
+    public final int tradeState = 6;
+
+    // REMEMBER! CHEST IS AN ENTITY!
+    public Entity currentChest;
 
     // BATTLE VARS
     public int currentBattleMonsterIndex;
@@ -146,6 +150,7 @@ public class GamePanel extends JPanel implements Runnable{
             transitionCounter++;
             if(transitionCounter > 60) { // Animation plays for 1 second (60 frames)
                 transitionCounter = 0;
+                playMusic(5);
                 gameState = battleState; // Switch to actual battle
             }
         }
@@ -217,18 +222,15 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void playMusic(int i) {
-        music.setFile(i);
-        music.play();
-        music.loop(); // Background music should loop
+        music.play(i); // Simplified: Just play index i
+        music.loop(i);
     }
 
     public void stopMusic() {
-        music.stop();
+        music.stopAll(); // New helper method
     }
 
     public void playSE(int i) {
-        // Sound effects (SE) don't loop
-        se.setFile(i);
-        se.play();
+        se.play(i); // Simplified: Just play index i
     }
 }

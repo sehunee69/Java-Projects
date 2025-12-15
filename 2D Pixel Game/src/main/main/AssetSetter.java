@@ -87,6 +87,10 @@ public class AssetSetter {
         gp.obj[2] = new OBJ_Water(gp);
         gp.obj[2].worldX = gp.tileSize * 26; 
         gp.obj[2].worldY = gp.tileSize * 26;
+
+        gp.obj[3] = new obj.OBJ_Chest(gp);
+        gp.obj[3].worldX = gp.tileSize * 46;
+        gp.obj[3].worldY = gp.tileSize * 23;
     }
 
     public void setNPC() {

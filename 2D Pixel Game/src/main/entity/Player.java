@@ -4,13 +4,11 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
 import main.GamePanel;
 import main.KeyHandler;
-import obj.OBJ_HealingPotion;
 
 public class Player extends Entity{
 
@@ -19,10 +17,6 @@ public class Player extends Entity{
 
     public final int screenX;
     public final int screenY;
-
-    // The Bag
-    public ArrayList<Entity> inventory = new ArrayList<>();
-    public final int maxInventorySize = 18; // limit slots
 
     public Player(GamePanel gp, KeyHandler keyH) {
         super(gp); // Calls Entity constructor
@@ -110,86 +104,94 @@ public class Player extends Entity{
 
     public void update() {
 
-        if(keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
+        boolean moving = false;
 
-            if(keyH.upPressed == true) {
-            direction = "up";
-        } else if(keyH.downPressed == true) {
-            direction = "down";
-        } else if(keyH.leftPressed == true) {
-            direction = "left";
-        } else if(keyH.rightPressed == true) {
-            direction = "right";
-        } 
+        // 1. CHECK DIRECTION INPUT
+        if(keyH.upPressed == true || keyH.downPressed == true || 
+        keyH.leftPressed == true || keyH.rightPressed == true) {
+            
+            moving = true; // We are trying to move
 
-        //CHECK TILE COLLISION
+            if(keyH.upPressed == true) direction = "up";
+            if(keyH.downPressed == true) direction = "down";
+            if(keyH.leftPressed == true) direction = "left";
+            if(keyH.rightPressed == true) direction = "right";
+        }
+
+        // 2. CHECK COLLISION & INTERACTION (Always run this!)
+        // We run this even if 'moving' is false, so we can interact while standing still.
+        
         collisionOn = false;
         gp.cChecker.checkTile(this);
 
-        // CHECK MONSTER COLLISION (NEW CODE)
-        int monsterIndex = gp.cChecker.checkEntity(this, gp.monsters);
-        interactMonster(monsterIndex);
+        int savedSpeed = speed;
+        speed = 6;
 
-        // CHECK OBJECT COLLISION
-        int objIndex = gp.cChecker.checkObject(this, true); // We need to create this method next
-        pickUpObject(objIndex);
+        // CHECK OBJECTS (Chest, Door, Potions)
+        int objIndex = gp.cChecker.checkObject(this, true);
+        interactObject(objIndex); // Checks for 'E' press inside here
 
-        // CHECK NPC COLLISION
+        speed = savedSpeed;
+
+        // CHECK NPC
         int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
         interactNPC(npcIndex);
 
-        //IF FALSE, PLAYER CAN MOVE
-        if(collisionOn == false) {
+        // CHECK MONSTER
+        int monsterIndex = gp.cChecker.checkEntity(this, gp.monsters);
+        interactMonster(monsterIndex);
+
+        // 3. MOVE PLAYER (Only if moving key is held AND no collision)
+        if(moving == true && collisionOn == false) {
 
             switch(direction) {
-
-                case "up":
-                    worldY -= speed;
-                    break;
-                case "down":
-                    worldY += speed;
-                    break;
-                case "left":
-                    worldX -= speed;
-                    break;
-                case "right":
-                    worldX += speed;
-                    break;
-                
+                case "up": worldY -= speed; break;
+                case "down": worldY += speed; break;
+                case "left": worldX -= speed; break;
+                case "right": worldX += speed; break;
             }
         }
-
-        spriteCounter++;
-        if(spriteCounter > 5) {
-
-            if(spriteNum == 1) {
-                spriteNum = 2;
+        
+        // 4. UPDATE SPRITE ANIMATION (Only if moving)
+        // If we don't check 'moving', the legs will keep running while standing still!
+        if(moving == true) {
+            spriteCounter++;
+            if(spriteCounter > 5) {
+                if(spriteNum == 1) spriteNum = 2;
+                else if(spriteNum == 2) spriteNum = 3;
+                else if(spriteNum == 3) spriteNum = 1;
+                spriteCounter = 0;
             }
-            else if(spriteNum == 2) {
-                spriteNum = 3;
-            }
-            else if(spriteNum == 3) {
-                spriteNum = 1;
-            }
-
-            spriteCounter = 0;
-        }
         }
     }
 
-    public void pickUpObject(int i) {
-        if(i != 999) {
-            String text = "";
-            if(inventory.size() != maxInventorySize) {
-                inventory.add(gp.obj[i]);
-                gp.playSE(1);
-                gp.ui.showMessage("Got a " + gp.obj[i].name + "!");
-                gp.obj[i] = null;
-            } else {
-                gp.ui.showMessage("Inventory Full!");
+    public void interactObject(int i) {
+    if(i != 999) {
+        
+        // IF IT IS A CHEST (Checking Class type)
+        if(gp.obj[i] instanceof obj.OBJ_Chest) {
+            if(gp.keyH.ePressed == true) { 
+                gp.gameState = gp.tradeState;
+                gp.ui.npc = gp.obj[i]; 
+                gp.playSE(2); 
+            }
+        }
+        // NORMAL PICKUP LOGIC
+        else if (! (gp.obj[i] instanceof obj.OBJ_Chest)) { 
+            if(i != 999) {
+                String text = "";
+                if(inventory.size() != maxInventorySize) {
+                    inventory.add(gp.obj[i]);
+                    gp.playSE(1);
+                    gp.ui.showMessage("Got a " + gp.obj[i].name + "!");
+                    gp.obj[i] = null;
+                } else {
+                    gp.ui.showMessage("Inventory Full!");
+                }
             }
         }
     }
+}
 
     public void selectItem() {
         int itemIndex = gp.ui.getItemIndexOnSlot();
@@ -251,6 +253,11 @@ public class Player extends Entity{
 
     public void interactMonster(int i) {
         if(i != 999) {
+
+            gp.playSE(4);
+
+            gp.stopMusic();
+
             gp.gameState = gp.transitionState;
             gp.transitionCounter = 0;
 

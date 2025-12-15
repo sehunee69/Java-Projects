@@ -3,6 +3,7 @@ package entity;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import main.GamePanel;
 
 public class Entity {
@@ -63,6 +64,10 @@ public class Entity {
     public final int type_pickupOnly = 7;
     public final int type_crafting = 8;
 
+    // INVENTORY
+    public ArrayList<Entity> inventory = new ArrayList<>();
+    public final int maxInventorySize = 18;
+
     public String dialogues[] = new String[20];
     int dialogueIndex = 0;
 
@@ -110,10 +115,12 @@ public class Entity {
     // If we run out of text, reset (or you can stop interacting)
         if(dialogues[dialogueIndex] == null) {
             dialogueIndex = 0; // Reset for next time
+            gp.playSE(3);
             gp.gameState = gp.playState; // CLOSE THE WINDOW
         } 
         else {
             gp.ui.currentDialogue = dialogues[dialogueIndex]; // Show current line
+            gp.playSE(3);
             dialogueIndex++; // Prepare for next line
             gp.gameState = gp.dialogueState; // OPEN THE WINDOW
         }

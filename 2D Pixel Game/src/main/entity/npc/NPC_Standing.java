@@ -21,7 +21,7 @@ public class NPC_Standing extends Entity {
             // Load the ONE image you want for this NPC
             // We set every direction to this same image so they never appear to turn
             
-            // Replace "/npc/guard.png" with your actual image path
+            
             up1 = ImageIO.read(getClass().getResourceAsStream("/entity/npc/npc_res/standing/tile055.png")); 
             up2 = up1;
             up3 = up1;

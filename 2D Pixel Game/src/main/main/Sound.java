@@ -8,51 +8,80 @@ import javax.sound.sampled.FloatControl;
 
 public class Sound {
 
-    Clip clip;
-    URL soundURL[] = new URL[30];
+    Clip[] clips;
+    URL[] soundURL = new URL[30];
 
     public Sound() {
-        // Load your sound files into the array
-        // 0 = Background Music
+        
+        // 1. SETUP FILE PATHS
         soundURL[0] = getClass().getResource("/res/sounds/Pixel 2.wav"); 
         soundURL[1] = getClass().getResource("/res/sounds/pick-upSFX.wav");
+        soundURL[2] = getClass().getResource("/res/sounds/open-bag-sound-39216.wav");
+        soundURL[3] = getClass().getResource("/res/sounds/8-bit-game-sfx-sound-26-269962.wav");
+        soundURL[4] = getClass().getResource("/res/sounds/enemy-encounter-undertale.wav");
+        soundURL[5] = getClass().getResource("/res/sounds/Pixel 5.wav");
+        soundURL[6] = getClass().getResource("/res/sounds/attack-slash.wav");
+
+        // 2. INITIALIZE CLIPS ARRAY
+        clips = new Clip[soundURL.length];
         
-        // You can add sound effects later:
-        // soundURL[1] = getClass().getResourceAsStream("/sound/coin.wav");
-        // soundURL[2] = getClass().getResourceAsStream("/sound/powerup.wav");
-        // soundURL[3] = getClass().getResourceAsStream("/sound/unlock.wav");
-        // soundURL[4] = getClass().getResourceAsStream("/sound/fanfare.wav");
+        // 3. PRE-LOAD ALL SOUNDS INTO MEMORY NOW
+        for(int i = 0; i < soundURL.length; i++) {
+            if(soundURL[i] != null) {
+                loadSound(i);
+            }
+        }
     }
     
-    // Note: If getResourceAsStream doesn't work for Audio, try getResource:
-    // soundURL[0] = getClass().getResource("/sound/BlueBoyAdventure.wav");
-    // (Usually getClass().getResource() is safer for Sound URL arrays)
-
-    public void setFile(int i) {
+    public void loadSound(int i) {
         try {
             AudioInputStream ais = AudioSystem.getAudioInputStream(soundURL[i]);
-            clip = AudioSystem.getClip();
-            clip.open(ais);
-
-            // Make the music more quieter
-            if(i == 0) {
-                FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+            clips[i] = AudioSystem.getClip();
+            clips[i].open(ais);
+            
+            // ADJUST VOLUME FOR MUSIC (Index 0)
+            if(i == 0 || i == 5) {
+                FloatControl gainControl = (FloatControl) clips[i].getControl(FloatControl.Type.MASTER_GAIN);
                 gainControl.setValue(-20.0f);
+            }
+            if(i == 6) { 
+                FloatControl gainControl = (FloatControl) clips[i].getControl(FloatControl.Type.MASTER_GAIN);
+                gainControl.setValue(-15.0f);
             }
         } catch(Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void play() {
-        clip.start();
+    public void play(int i) {
+        if(clips[i] == null) return;
+        
+        // Stop it if it's already playing (allows rapid fire)
+        if(clips[i].isRunning()) {
+            clips[i].stop();
+        }
+        
+        // Rewind and Play
+        clips[i].setFramePosition(0);
+        clips[i].start();
     }
 
-    public void loop() {
-        clip.loop(Clip.LOOP_CONTINUOUSLY);
+    public void loop(int i) {
+        if(clips[i] == null) return;
+        clips[i].loop(Clip.LOOP_CONTINUOUSLY);
     }
 
-    public void stop() {
-        clip.stop();
+    public void stop(int i) {
+        if(clips[i] == null) return;
+        clips[i].stop();
+    }
+    
+    // Helper to stop ALL sounds (useful for battle transitions)
+    public void stopAll() {
+        for(int i = 0; i < clips.length; i++) {
+            if(clips[i] != null) {
+                clips[i].stop();
+            }
+        }
     }
 }

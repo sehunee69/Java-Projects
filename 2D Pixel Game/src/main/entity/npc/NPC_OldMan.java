@@ -1,7 +1,6 @@
 package entity.npc; // or package entity.npc;
 
 import java.util.Random;
-import java.awt.Rectangle;
 import javax.imageio.ImageIO;
 import main.GamePanel;
 import entity.Entity;
