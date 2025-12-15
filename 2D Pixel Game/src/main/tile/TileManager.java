@@ -14,7 +14,7 @@ public class TileManager extends Tile{
 
     GamePanel gp;
     public Tile[] tile;
-    public int mapTileNum[][];
+    public int mapTileNum[][][];
 
     public static final String fileName = ("/pixelMap_clean.txt");
 
@@ -22,11 +22,12 @@ public class TileManager extends Tile{
 
         this.gp = gp;
 
-        tile = new Tile[41];
-        mapTileNum = new int[gp.maxWorldCol][gp.maxWorldRow];
+        tile = new Tile[50];
+        mapTileNum = new int[gp.maxMap][gp.maxWorldCol][gp.maxWorldRow];
 
         getTileImage();
-        loadMap();
+        loadMap("/pixelMap_clean.txt", 0);
+        loadMap("/dungeon_updated.txt", 1);
     }
 
     public void getTileImage() {
@@ -163,6 +164,9 @@ public class TileManager extends Tile{
             tile[40] = new Tile();
             tile[40].image = ImageIO.read(getClass().getResourceAsStream("/035.png"));
 
+            tile[41] = new Tile();
+            tile[41].image = ImageIO.read(getClass().getResourceAsStream("/037.png"));
+
             // tile[1] = new Tile();
             // tile[1].image = ImageIO.read(getClass().getResourceAsStream("/wall.png"));
             // tile[1].collision = true;   
@@ -187,11 +191,11 @@ public class TileManager extends Tile{
         }
     }
 
-    public void loadMap() {
+    public void loadMap(String filePath, int map) {
 
         try{
 
-            InputStream is = getClass().getResourceAsStream(fileName);
+            InputStream is = getClass().getResourceAsStream(filePath);
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
             int col = 0;
@@ -207,7 +211,7 @@ public class TileManager extends Tile{
 
                     int num = Integer.parseInt(numbers[col]);
 
-                    mapTileNum[col][row] = num;
+                    mapTileNum[map][col][row] = num;
                     col++;
                 }
 
@@ -231,7 +235,7 @@ public class TileManager extends Tile{
 
         while(worldCol < gp.maxWorldCol && worldRow < gp.maxWorldRow) {
 
-            int tileNum = mapTileNum[worldCol][worldRow];
+            int tileNum = mapTileNum[gp.currentMap][worldCol][worldRow];
 
             int worldX = worldCol * gp.tileSize;
             int worldY = worldRow * gp.tileSize;

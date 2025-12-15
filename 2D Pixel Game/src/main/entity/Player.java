@@ -17,6 +17,7 @@ public class Player extends Entity{
 
     public final int screenX;
     public final int screenY;
+    public Entity currentLight;
 
     public Player(GamePanel gp, KeyHandler keyH) {
         super(gp); // Calls Entity constructor
@@ -134,11 +135,11 @@ public class Player extends Entity{
         speed = savedSpeed;
 
         // CHECK NPC
-        int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
+        int npcIndex = gp.cChecker.checkEntity(this, gp.npc[gp.currentMap]); 
         interactNPC(npcIndex);
 
         // CHECK MONSTER
-        int monsterIndex = gp.cChecker.checkEntity(this, gp.monsters);
+        int monsterIndex = gp.cChecker.checkEntity(this, gp.monsters[gp.currentMap]);
         interactMonster(monsterIndex);
 
         // 3. MOVE PLAYER (Only if moving key is held AND no collision)
@@ -169,22 +170,22 @@ public class Player extends Entity{
     if(i != 999) {
         
         // IF IT IS A CHEST (Checking Class type)
-        if(gp.obj[i] instanceof obj.OBJ_Chest) {
+        if(gp.obj[gp.currentMap][i] instanceof obj.OBJ_Chest) {
             if(gp.keyH.ePressed == true) { 
                 gp.gameState = gp.tradeState;
-                gp.ui.npc = gp.obj[i]; 
+                gp.ui.npc = gp.obj[gp.currentMap][i]; 
                 gp.playSE(2); 
             }
         }
         // NORMAL PICKUP LOGIC
-        else if (! (gp.obj[i] instanceof obj.OBJ_Chest)) { 
+        else if (! (gp.obj[gp.currentMap][i] instanceof obj.OBJ_Chest)) { 
             if(i != 999) {
                 String text = "";
                 if(inventory.size() != maxInventorySize) {
-                    inventory.add(gp.obj[i]);
+                    inventory.add(gp.obj[gp.currentMap][i]);
                     gp.playSE(1);
-                    gp.ui.showMessage("Got a " + gp.obj[i].name + "!");
-                    gp.obj[i] = null;
+                    gp.ui.showMessage("Got a " + gp.obj[gp.currentMap][i].name + "!");
+                    gp.obj[gp.currentMap][i] = null;
                 } else {
                     gp.ui.showMessage("Inventory Full!");
                 }
@@ -264,7 +265,7 @@ public class Player extends Entity{
             gp.currentBattleMonsterIndex = i;
             gp.player.direction = "up";
 
-            if(this.speed >= gp.monsters[i].speed) {
+            if(this.speed >= gp.monsters[gp.currentMap][i].speed) {
                 gp.battlePhase = 0; // Player goes first
                 gp.ui.showMessage("You are faster! Your turn.");
             } else {

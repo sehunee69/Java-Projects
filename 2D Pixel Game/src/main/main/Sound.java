@@ -21,6 +21,7 @@ public class Sound {
         soundURL[4] = getClass().getResource("/res/sounds/enemy-encounter-undertale.wav");
         soundURL[5] = getClass().getResource("/res/sounds/Pixel 5.wav");
         soundURL[6] = getClass().getResource("/res/sounds/attack-slash.wav");
+        soundURL[7] = getClass().getResource("/res/sounds/Pixel 11.wav");
 
         // 2. INITIALIZE CLIPS ARRAY
         clips = new Clip[soundURL.length];
@@ -40,7 +41,7 @@ public class Sound {
             clips[i].open(ais);
             
             // ADJUST VOLUME FOR MUSIC (Index 0)
-            if(i == 0 || i == 5) {
+            if(i == 0 || i == 5 || i == 7) {
                 FloatControl gainControl = (FloatControl) clips[i].getControl(FloatControl.Type.MASTER_GAIN);
                 gainControl.setValue(-20.0f);
             }

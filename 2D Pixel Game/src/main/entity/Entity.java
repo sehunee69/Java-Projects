@@ -85,8 +85,8 @@ public class Entity {
         gp.cChecker.checkTile(this);
 
         boolean contactPlayer = gp.cChecker.checkPlayer(this);
-        gp.cChecker.checkEntity(this, gp.npc);
-        gp.cChecker.checkEntity(this, gp.monsters);
+        gp.cChecker.checkEntity(this, gp.npc[gp.currentMap]);
+        gp.cChecker.checkEntity(this, gp.monsters[gp.currentMap]);
         
         if(collisionOn == false) {
             switch(direction) {

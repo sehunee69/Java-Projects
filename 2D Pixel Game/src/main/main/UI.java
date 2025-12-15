@@ -375,14 +375,14 @@ public class UI {
         }
 
         int monsterIndex = gp.currentBattleMonsterIndex;
-        if(monsterIndex != 999 && gp.monsters[monsterIndex] != null) {
+        if(monsterIndex != 999 && gp.monsters[gp.currentMap][monsterIndex] != null) {
             int monsterX = gp.screenWidth/2 - (gp.tileSize*2);
             int monsterY = gp.tileSize; 
-            g2.drawImage(gp.monsters[monsterIndex].down1, monsterX, monsterY, gp.tileSize*4, gp.tileSize*4, null);
+            g2.drawImage(gp.monsters[gp.currentMap][monsterIndex].down1, monsterX, monsterY, gp.tileSize*4, gp.tileSize*4, null);
             
             g2.setFont(g2.getFont().deriveFont(Font.BOLD, 24F));
             g2.setColor(Color.white);
-            String hpText = "HP: " + gp.monsters[monsterIndex].life + "/" + gp.monsters[monsterIndex].maxLife;
+            String hpText = "HP: " + gp.monsters[gp.currentMap][monsterIndex].life + "/" + gp.monsters[gp.currentMap][monsterIndex].maxLife;
             int textLength = (int)g2.getFontMetrics().getStringBounds(hpText, g2).getWidth();
             g2.drawString(hpText, gp.screenWidth/2 - textLength/2, monsterY - 10);
         }

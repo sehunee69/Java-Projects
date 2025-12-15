@@ -35,17 +35,17 @@ public class KeyHandler implements KeyListener{
 
             if(code == KeyEvent.VK_E) {
             // Check if NPC is in front of player
-                int npcIndex = gp.cChecker.checkEntity(gp.player, gp.npc);
+                int npcIndex = gp.cChecker.checkEntity(gp.player, gp.npc[gp.currentMap]);
                 if(npcIndex != 999) {
                     gp.currentNPCIndex = npcIndex;
-                    gp.npc[npcIndex].speak();
+                    gp.npc[gp.currentMap][npcIndex].speak();
                 }
             }
         } 
         else if(gp.gameState == gp.dialogueState) {
             if(code == KeyEvent.VK_ENTER || code == KeyEvent.VK_E) {
                 if(code == KeyEvent.VK_ENTER || code == KeyEvent.VK_E) {
-                    gp.npc[gp.currentNPCIndex].speak();
+                    gp.npc[gp.currentMap][gp.currentNPCIndex].speak();
                 }
             }
         }
@@ -128,7 +128,7 @@ public class KeyHandler implements KeyListener{
                     if(gp.ui.commandNum == 0) {
                         
                         int monsterIndex = gp.currentBattleMonsterIndex;
-                        Entity monster = gp.monsters[monsterIndex];
+                        Entity monster = gp.monsters[gp.currentMap][monsterIndex];
                         
                         // PLAYER ATTACKS
                         gp.playSE(6);
@@ -141,16 +141,16 @@ public class KeyHandler implements KeyListener{
                         // CHECK DEATH
                         if(monster.life <= 0) {
                             // Drop Item
-                            for(int j = 0; j < gp.obj.length; j++) {
-                                if(gp.obj[j] == null) {
-                                    gp.obj[j] = new obj.OBJ_SlimeGoop(gp);
-                                    gp.obj[j].worldX = monster.worldX;
-                                    gp.obj[j].worldY = monster.worldY;
+                            for(int j = 0; j < gp.obj[1].length; j++) {
+                                if(gp.obj[gp.currentMap][j] == null) {
+                                    gp.obj[gp.currentMap][j] = new obj.OBJ_SlimeGoop(gp);
+                                    gp.obj[gp.currentMap][j].worldX = monster.worldX;
+                                    gp.obj[gp.currentMap][j].worldY = monster.worldY;
                                     break; 
                                 }
                             }
                             // End Battle
-                            gp.monsters[monsterIndex] = null; 
+                            gp.monsters[gp.currentMap][monsterIndex] = null; 
                             gp.stopMusic();
                             gp.gameState = gp.playState; 
                             gp.playMusic(0);

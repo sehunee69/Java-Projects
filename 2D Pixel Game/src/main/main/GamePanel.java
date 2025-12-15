@@ -30,6 +30,8 @@ public class GamePanel extends JPanel implements Runnable{
     public final int maxWorldHeight = tileSize * maxWorldRow;
     public int worldWidth = tileSize * maxWorldCol;
     public int worldHeight = tileSize * maxWorldRow;
+    public final int maxMap = 10;
+    public int currentMap = 0;
 
     //GAME STATE
     public int gameState;
@@ -63,10 +65,12 @@ public class GamePanel extends JPanel implements Runnable{
     Thread gameThread;
     public CollisionChecker cChecker = new CollisionChecker(this);
     public Player player = new Player(this, keyH);
-    public Entity monsters[] = new Entity[20];
-    public Entity obj[] = new Entity[10]; // Objects
-    public Entity npc[] = new Entity[10];
+    public Entity monsters[][] = new Entity[maxMap][20];
+    public Entity obj[][] = new Entity[maxMap][10]; // Objects
+    public Entity npc[][] = new Entity[maxMap][10];
     AssetSetter aSetter = new AssetSetter(this);
+    public EventHandler eHandler = new EventHandler(this);
+    public Lighting light = new Lighting(this);
 
     public GamePanel() {
 
@@ -134,14 +138,18 @@ public class GamePanel extends JPanel implements Runnable{
         if(gameState == playState) {
             player.update();
 
-            for(int i = 0; i < npc.length; i++) {
-                if(npc[i] != null) {
-                    npc[i].update();
+            eHandler.checkEvent();
+
+            for(int i = 0; i < npc[1].length; i++) {
+                if(npc[currentMap][i] != null) {
+                    npc[currentMap][i].update();
                 }
             }
 
-            for(int i = 0; i < monsters.length; i++) {
-                if(monsters[i] != null) monsters[i].update();
+            for(int i = 0; i < monsters[1].length; i++) {
+                if(monsters[currentMap][i] != null) {
+                    monsters[currentMap][i].update();
+                }
             }
         }
         
@@ -163,7 +171,7 @@ public class GamePanel extends JPanel implements Runnable{
                 // Wait 60 frames (1 second) then monster attacks
                 if(battleTurnCounter > 60) {
                     
-                    Entity monster = monsters[currentBattleMonsterIndex];
+                    Entity monster = monsters[currentMap][currentBattleMonsterIndex];
                     
                     // Simple Damage Calculation
                     int damage = monster.atk - player.def;
@@ -195,28 +203,26 @@ public class GamePanel extends JPanel implements Runnable{
 
         tileM.draw(g2);
 
-        for(int i = 0; i < npc.length; i++) {
-            if(npc[i] != null) {
-                npc[i].draw(g2, this);
+        for(int i = 0; i < npc[1].length; i++) {
+            if(npc[currentMap][i] != null) {
+                npc[currentMap][i].draw(g2, this);
             }
         }
 
-        for(int i = 0; i < monsters.length; i++) {
-            if(monsters[i] != null) {
-                // We need to implement a generic draw method in Entity or cast it
-                // Ideally, move the draw logic from Player to Entity class
-                // For now, we assume Entity has the draw method (See Step 5 below)
-                monsters[i].draw(g2, this); 
+        for(int i = 0; i < monsters[1].length; i++) {
+            if(monsters[currentMap][i] != null) {
+                monsters[currentMap][i].draw(g2, this);
             }
         }
 
-        for(int i = 0; i < obj.length; i++) {
-            if(obj[i] != null) {
-                obj[i].draw(g2, this);
+        for(int i = 0; i < obj[1].length; i++) {
+            if(obj[currentMap][i] != null) {
+                obj[currentMap][i].draw(g2, this);
             }
         }
         
         player.draw(g2);
+        light.draw(g2);
         ui.draw(g2);
         g2.dispose();
     }
