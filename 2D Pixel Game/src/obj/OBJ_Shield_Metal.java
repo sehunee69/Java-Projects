@@ -10,7 +10,7 @@ public class OBJ_Shield_Metal extends Entity {
     public OBJ_Shield_Metal(GamePanel gp) {
         super(gp);
 
-        type = type_sword;
+        type = type_shield;
         name = "Metal Shield";
         defenseValue = 4; // Stronger Defense (Wood is 2)
         description = "[" + name + "]\nA solid shield.\nDef +4.";

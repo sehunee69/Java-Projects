@@ -22,6 +22,9 @@ public class Sound {
         soundURL[5] = getClass().getResource("/res/sounds/Pixel 5.wav");
         soundURL[6] = getClass().getResource("/res/sounds/attack-slash.wav");
         soundURL[7] = getClass().getResource("/res/sounds/Pixel 11.wav");
+        soundURL[8] = getClass().getResource("/res/sounds/Pixel 3.wav");
+        soundURL[9] = getClass().getResource("/res/sounds/Pixel 10.wav");
+
 
         // 2. INITIALIZE CLIPS ARRAY
         clips = new Clip[soundURL.length];

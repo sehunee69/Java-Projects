@@ -106,6 +106,10 @@ public class UI {
             drawGameOverScreen();
         }
 
+        if(gp.gameState == gp.gameWinState) {
+            drawGameWinScreen();
+        }
+
         // MESSAGE OVERLAY
         if(messageOn == true) {
             g2.setFont(g2.getFont().deriveFont(30F));
@@ -823,6 +827,54 @@ public class UI {
         if(commandNum == 1) {
             g2.drawString(">", x - 40, y);
         }
+    }
+
+    public void drawGameWinScreen() {
+        
+        // 1. Background (Green/Gold tint)
+        g2.setColor(new Color(0, 0, 0, 150));
+        g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+        
+        int x;
+        int y;
+        String text;
+
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 80f));
+
+        // 2. Title
+        text = "Quest Complete";
+        // Shadow
+        g2.setColor(Color.black);
+        x = getXforCenteredText(text);
+        y = gp.tileSize * 4;
+        g2.drawString(text, x, y);
+        // Main
+        g2.setColor(Color.yellow);
+        g2.drawString(text, x - 4, y - 4);
+
+        // 3. The Specific Message
+        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 40f));
+        g2.setColor(Color.white);
+        
+        text = "You have saved the Princess";
+        x = getXforCenteredText(text);
+        y += gp.tileSize * 3;
+        g2.drawString(text, x, y);
+
+        text = "but at the cost of your heart."; // The twist!
+        x = getXforCenteredText(text);
+        y += gp.tileSize * 1.5;
+        g2.drawString(text, x, y);
+
+        // 4. Return to Title Option
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 40f));
+        text = "Quit Game";
+        x = getXforCenteredText(text);
+        y += gp.tileSize * 3;
+        g2.drawString(text, x, y);
+        
+        // Draw Cursor (Always on Quit since there's only 1 option)
+        g2.drawString(">", x - 40, y);
     }
 
     // Helper method to center text (If you don't have it already)

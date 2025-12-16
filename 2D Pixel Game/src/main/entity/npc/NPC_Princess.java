@@ -35,16 +35,39 @@ public class NPC_Princess extends Entity {
 
     public void setDialogue() {
         dialogues[0] = "Oh, brave hero!";
-        dialogues[1] = "Please be careful...";
-        dialogues[2] = "The dungeon in the other world is\ncrawling with Skeletons.";
-        dialogues[3] = "They are much stronger than the Slimes!";
+        dialogues[1] = "Thank you for saving me.";
+        dialogues[2] = "However, I cannot return \nyour love since... ";
+        dialogues[3] = "I still love Siegfred more than you";
     }
 
     public void setAction() {
         
     }
     
+    @Override
     public void speak() {
-        super.speak();
+        
+        // If we reach the end of the conversation
+        if(dialogues[dialogueIndex] == null) {
+            dialogueIndex = 0; 
+            gp.gameState = gp.gameWinState; // <--- SWITCH TO WIN STATE INSTEAD OF PLAY
+            gp.stopMusic();
+            gp.playSE(8); // Play a victory sound (ensure you have one, or remove this)
+        } 
+        else {
+            // Normal dialogue behavior
+            gp.ui.currentDialogue = dialogues[dialogueIndex];
+            dialogueIndex++;
+            gp.gameState = gp.dialogueState;
+            gp.playSE(3);
+        }
+        
+        // Face the player
+        switch(gp.player.direction) {
+            case "up": direction = "down"; break;
+            case "down": direction = "up"; break;
+            case "left": direction = "right"; break;
+            case "right": direction = "left"; break;
+        }
     }
 }

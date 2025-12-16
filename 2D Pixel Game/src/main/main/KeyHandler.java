@@ -210,6 +210,7 @@ public class KeyHandler implements KeyListener{
                     if(gp.player.life <= 0) {
                         gp.gameState = gp.gameOverState;
                         gp.stopMusic();
+                        gp.playSE(9);
                     } 
                     // B. PLAYER ALIVE -> RETURN TO MENU
                     else {
@@ -248,6 +249,12 @@ public class KeyHandler implements KeyListener{
         // 5. GAME OVER STATE
         else if(gp.gameState == gp.gameOverState) {
             gameOverStateInput(code);
+        }
+        else if(gp.gameState == gp.gameWinState) {
+            if(code == KeyEvent.VK_ENTER) {
+                // Quit game (or return to title screen if you have one)
+                System.exit(0);
+            }
         }
     }
 

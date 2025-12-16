@@ -42,6 +42,7 @@ public class GamePanel extends JPanel implements Runnable{
     public final int dialogueState = 5;
     public final int tradeState = 6;
     public final int gameOverState = 7;
+    public final int gameWinState = 8;
 
     // REMEMBER! CHEST IS AN ENTITY!
     public Entity currentChest;
